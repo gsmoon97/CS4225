@@ -115,12 +115,12 @@ public class TopkCommonWords {
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf, "top common words");
 		job.setJarByClass(TopkCommonWords.class);
-		job.setMapperClass(TokenizerMapper.class);		
+//		job.setMapperClass(TokenizerMapper.class);		
 		job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-//		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
+		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper.class);
 //		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
 		// MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
