@@ -68,8 +68,8 @@ public class TopkCommonWords {
 					secondFreq++;
 				}
 			}
-			if (firstFreq > 0 && secondFreq > 0) {
-				result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
+			if ((firstFreq > 0) && (secondFreq > 0)) {
+				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
 				context.write(key, result);
 			}
 		}
