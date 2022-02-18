@@ -34,7 +34,6 @@ public class TopkCommonWords{
       FileSplit fileSplit = (FileSplit)context.getInputSplit();
       String fileName = fileSplit.getPath().getName();
       while (itr.hasMoreTokens()) {
-        itr.nextToken()
         word.set(itr.nextToken());
         file.set(fileName);
         context.write(word, file);
