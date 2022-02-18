@@ -68,7 +68,7 @@ public class TopkCommonWords{
       int firstFreq = 0;
       int secondFreq = 0;
       
-      for (Boolean val : values) {
+      for (BooleanWritable val : values) {
         if (val.get()) {
         	firstFreq++;
         } else {
