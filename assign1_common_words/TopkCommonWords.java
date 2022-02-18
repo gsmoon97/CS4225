@@ -30,10 +30,10 @@ public class TopkCommonWords{
 
     private Text word = new Text();
     private Text file = new Text();
-    private String fileName = new String();
+    private Text fileName = new Text();
     
     public void configure(JobConf job) {
-      filename = job.get("map.input.file");
+      filename.set(job.get("map.input.file"));
     }
 
     public void map(Object key, Text value, Context context
@@ -43,8 +43,7 @@ public class TopkCommonWords{
       // String fileName = fileSplit.getPath().getName();
       while (itr.hasMoreTokens()) {
         word.set(itr.nextToken());
-        file.set(fileName);
-        context.write(word, file);
+        context.write(word, fileName);
       }
     }
   }
