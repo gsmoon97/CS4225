@@ -88,8 +88,8 @@ public class TopkCommonWords {
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper3.class);
-		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper4.class);
+		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
+		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
 		// MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
