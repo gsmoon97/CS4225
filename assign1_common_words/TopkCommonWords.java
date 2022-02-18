@@ -13,6 +13,7 @@ import java.util.HashMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -22,50 +23,61 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.conf.Configuration;
 
 public class TopkCommonWords{
 
-  public static class TokenizerMapper
-       extends Mapper<Object, Text, Text, Text>{
-
-    private Text word = new Text();
-    private Text file = new Text();
-    private Text fileName = new Text();
-    
-    public void configure(JobConf job) {
-      fileName.set(job.get("map.input.file"));
-    }
-
-    public void map(Object key, Text value, Context context
-                    ) throws IOException, InterruptedException {
-      StringTokenizer itr = new StringTokenizer(value.toString());
-      // FileSplit fileSplit = (FileSplit)context.getInputSplit();
-      // String fileName = fileSplit.getPath().getName();
-      while (itr.hasMoreTokens()) {
-        word.set(itr.nextToken());
-        context.write(word, fileName);
-      }
-    }
-  }
-
+	
+	public static class TokenizerMapper1
+	extends Mapper<Object, Text, Text, BooleanWritable>{
+		
+		private Text word = new Text();
+		private BooleanWritable isFirstFile = new BooleanWritable(true);
+		
+		public void map(Object key, Text value, Context context
+				) throws IOException, InterruptedException {
+			StringTokenizer itr = new StringTokenizer(value.toString());
+			while (itr.hasMoreTokens()) {
+				word.set(itr.nextToken());
+				context.write(word, isFirstFile);
+			}
+		}
+	}
+	
+	public static class TokenizerMapper2
+	extends Mapper<Object, Text, Text, BooleanWritable>{
+		
+		private Text word = new Text();
+		private BooleanWritable isFirstFile = new BooleanWritable(false);
+		
+		public void map(Object key, Text value, Context context
+				) throws IOException, InterruptedException {
+			StringTokenizer itr = new StringTokenizer(value.toString());
+			while (itr.hasMoreTokens()) {
+				word.set(itr.nextToken());
+				context.write(word, isFirstFile);
+			}
+		}
+	}
+	
   public static class IntSumReducer
-       extends Reducer<Text,Text,Text,IntWritable> {
+       extends Reducer<Text,BooleanWritable,Text,IntWritable> {
     private IntWritable result = new IntWritable();
 
-    public void reduce(Text key, Iterable<Text> values,
+    public void reduce(Text key, Iterable<BooleanWritable> values,
                        Context context
                        ) throws IOException, InterruptedException {
-      int smallerFreq = 0;
-      HashMap<Text, Integer> commonWordMap = new HashMap<>();
-      for (Text val : values) {
-        int count = commonWordMap.getOrDefault(val, 0);
-        count++;
-        commonWordMap.put(val, count);
+      int firstFreq = 0;
+      int secondFreq = 0;
+      
+      for (Boolean val : values) {
+        if (val.get()) {
+        	firstFreq++;
+        } else {
+        	secondFreq++;
+        }
       }
-      smallerFreq = Collections.min(commonWordMap.values());
-      if (commonWordMap.size() > 1) {
-        result.set(smallerFreq);
+      if (firstFreq > 0 && secondFreq > 0) {
+        result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
         context.write(key, result);
       }
     }
@@ -80,9 +92,9 @@ public class TopkCommonWords{
     job.setReducerClass(IntSumReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
-    MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class);
-    MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class);
-    // MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class);
+    MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
+    MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
+    // MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
     FileOutputFormat.setOutputPath(job, new Path(args[3]));
     System.exit(job.waitForCompletion(true) ? 0 : 1);
   }
