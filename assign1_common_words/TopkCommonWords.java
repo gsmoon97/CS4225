@@ -27,10 +27,10 @@ public class TopkCommonWords{
 
 	
 	public static class TokenizerMapper1
-	extends Mapper<Object, Text, Text, BooleanWritable>{
+	extends Mapper<Object, Text, Text, IntWritable>{
 		
 		private Text word = new Text();
-		private BooleanWritable isFirstFile = new BooleanWritable(true);
+		private IntWritable isFirstFile = new IntWritable(1);
 		
 		public void map(Object key, Text value, Context context
 				) throws IOException, InterruptedException {
@@ -43,10 +43,10 @@ public class TopkCommonWords{
 	}
 	
 	public static class TokenizerMapper2
-	extends Mapper<Object, Text, Text, BooleanWritable>{
+	extends Mapper<Object, Text, Text, IntWritable>{
 		
 		private Text word = new Text();
-		private BooleanWritable isFirstFile = new BooleanWritable(false);
+		private IntWritable isFirstFile = new IntWritable(false);
 		
 		public void map(Object key, Text value, Context context
 				) throws IOException, InterruptedException {
@@ -59,17 +59,17 @@ public class TopkCommonWords{
 	}
 	
   public static class IntSumReducer
-       extends Reducer<Text,BooleanWritable,Text,IntWritable> {
+       extends Reducer<Text, IntWritable, Text, IntWritable> {
     private IntWritable result = new IntWritable();
 
-    public void reduce(Text key, Iterable<BooleanWritable> values,
+    public void reduce(Text key, Iterable<IntWritable> values,
                        Context context
                        ) throws IOException, InterruptedException {
       int firstFreq = 0;
       int secondFreq = 0;
       
-      for (BooleanWritable val : values) {
-        if (val.get()) {
+      for (IntWritable val : values) {
+        if (val.get() == 1) {
         	firstFreq++;
         } else {
         	secondFreq++;
