@@ -46,7 +46,7 @@ public class TopkCommonWords{
 	extends Mapper<Object, Text, Text, IntWritable>{
 		
 		private Text word = new Text();
-		private IntWritable isFirstFile = new IntWritable(false);
+		private IntWritable isFirstFile = new IntWritable(0);
 		
 		public void map(Object key, Text value, Context context
 				) throws IOException, InterruptedException {
