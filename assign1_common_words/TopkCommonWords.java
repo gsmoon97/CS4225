@@ -7,7 +7,7 @@
 
 import java.io.IOException;
 import java.util.StringTokenizer;
-import java.util.HashSet;
+import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -73,9 +73,9 @@ public class TopkCommonWords {
 					secondFreq++;
 				}
 			}
-			if ((firstFreq >= 0) && (secondFreq >= 0)) {
+			if ((firstFreq > 0) && (secondFreq >= 0)) {
 //				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
-				if (firstFreq < secondFreq) {
+				if (firstFreq > secondFreq) {
 					result.set(firstFreq);
 				} else {
 					result.set(secondFreq);
