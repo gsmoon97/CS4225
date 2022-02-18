@@ -3,6 +3,7 @@
 // References : 
 // WordCount.java
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
+// https://stackoverflow.com/questions/42048028/mapreduce-use-hadoop-configuration-object-to-read-in-a-text-file
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -25,7 +26,12 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class TopkCommonWords {
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
-		
+		Set<String> stopwords = new HashSet<String>();
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException {
+			Configuration conf = context.getConfiguration();
+			Path path = conf.get("stopwords.path");
+		}
 		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(1);
 
@@ -82,18 +88,17 @@ public class TopkCommonWords {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
+		conf.set("stopwords.path", new Path(args[2]));
 		Job job = Job.getInstance(conf, "top common words");
 		job.setJarByClass(TopkCommonWords.class);
-//		job.setMapperClass(TokenizerMapper.class);		
 		job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
 		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
-		// MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
-		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
+//
