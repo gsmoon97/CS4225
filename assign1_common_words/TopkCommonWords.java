@@ -70,12 +70,13 @@ public class TopkCommonWords {
 			}
 			if ((firstFreq > 0) && (secondFreq > 0)) {
 //				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
-//				context.write(key, result);context.write(key, result);
+				if (firstFreq < secondFreq) {
+					result.set(firstFreq);
+				} else {
+					result.set(secondFreq);
+				}
+				context.write(key, result);
 			}
-			result.set(firstFreq);
-			context.write(key, result);
-			result.set(secondFreq);
-			context.write(key, result);
 		}
 	}
 
