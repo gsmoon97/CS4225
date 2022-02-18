@@ -73,7 +73,9 @@ public class TopkCommonWords {
 //				} else {
 //					secondFreq++;
 //				}
-				sum += val.get();
+				if (val.equals(new IntWritable(2))) {
+					sum += val.get();
+				} 
 			}
 			result.set(sum);
 			context.write(key, result);
