@@ -1,5 +1,5 @@
-// Matric Number: 
-// Name: 
+// Matric Number: A0210908L
+// Name: Moon Geonsik
 // WordCount.java
 import java.io.IOException;
 import java.util.StringTokenizer;
