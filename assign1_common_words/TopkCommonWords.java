@@ -30,12 +30,17 @@ public class TopkCommonWords{
 
     private Text word = new Text();
     private Text file = new Text();
+    private String fileName = new String();
+    
+    public void configure(JobConf job) {
+      filename = job.get("map.input.file");
+    }
 
     public void map(Object key, Text value, Context context
                     ) throws IOException, InterruptedException {
       StringTokenizer itr = new StringTokenizer(value.toString());
-      FileSplit fileSplit = (FileSplit)context.getInputSplit();
-      String fileName = fileSplit.getPath().getName();
+      // FileSplit fileSplit = (FileSplit)context.getInputSplit();
+      // String fileName = fileSplit.getPath().getName();
       while (itr.hasMoreTokens()) {
         word.set(itr.nextToken());
         file.set(fileName);
