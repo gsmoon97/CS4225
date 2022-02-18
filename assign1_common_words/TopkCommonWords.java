@@ -33,7 +33,7 @@ public class TopkCommonWords{
     private Text fileName = new Text();
     
     public void configure(JobConf job) {
-      filename.set(job.get("map.input.file"));
+      fileName.set(job.get("map.input.file"));
     }
 
     public void map(Object key, Text value, Context context
