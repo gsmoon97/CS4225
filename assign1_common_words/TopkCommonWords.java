@@ -30,7 +30,7 @@ public class TopkCommonWords {
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
-			Path path = conf.get("stopwords.path");
+			Path path = new Path(conf.get("stopwords.path"));
 		}
 		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(1);
@@ -88,7 +88,7 @@ public class TopkCommonWords {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		conf.set("stopwords.path", new Path(args[2]));
+		conf.set("stopwords.path", args[2]);
 		Job job = Job.getInstance(conf, "top common words");
 		job.setJarByClass(TopkCommonWords.class);
 		job.setCombinerClass(IntSumReducer.class);
