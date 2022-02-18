@@ -27,7 +27,21 @@ import org.apache.commons.logging.LogFactory;
 
 public class TopkCommonWords {
 	
-	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
+	public static class TokenizerMapper3 extends Mapper<Object, Text, Text, IntWritable> {
+
+		private final static IntWritable one = new IntWritable(1);
+		private Text word = new Text();
+
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+			StringTokenizer itr = new StringTokenizer(value.toString());
+			while (itr.hasMoreTokens()) {
+				word.set(itr.nextToken());
+				context.write(word, one);
+			}
+		}
+	}
+	
+	public static class TokenizerMapper4 extends Mapper<Object, Text, Text, IntWritable> {
 
 		private final static IntWritable one = new IntWritable(1);
 		private Text word = new Text();
@@ -120,8 +134,8 @@ public class TopkCommonWords {
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper.class);
-//		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
+		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper3.class);
+		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper4.class);
 		// MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
