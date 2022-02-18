@@ -70,12 +70,16 @@ public class TopkCommonWords{
       for (IntWritable val : values) {
         if (val.get() == 1) {
         	firstFreq++;
+        	System.out.println("key : " + key + " value : " + val.get());
         } else {
         	secondFreq++;
+        	System.out.println("key : " + key + " value : " + val.get());
         }
       }
+      System.out.println("firstFreq : " + firstFreq + " secondFreq : " + secondFreq);
       if (firstFreq > 0 && secondFreq > 0) {
         result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
+        System.out.println("writing result for word : " + key);
         context.write(key, result);
       }
     }
