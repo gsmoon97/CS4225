@@ -22,17 +22,16 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class TopkCommonWords{
+public class TopkCommonWords {
 
-	
-	public static class TokenizerMapper1
-	extends Mapper<Object, Text, Text, IntWritable>{
-		
+	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
+
+		public static final Log log = LogFactory.getLog(TokenizerMapper1.class);
+
 		private Text word = new Text();
 		private IntWritable isFirstFile = new IntWritable(1);
-		
-		public void map(Object key, Text value, Context context
-				) throws IOException, InterruptedException {
+
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
@@ -40,15 +39,15 @@ public class TopkCommonWords{
 			}
 		}
 	}
-	
-	public static class TokenizerMapper2
-	extends Mapper<Object, Text, Text, IntWritable>{
-		
+
+	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
+
+		public static final Log log = LogFactory.getLog(TokenizerMapper2.class);
+
 		private Text word = new Text();
 		private IntWritable isFirstFile = new IntWritable(0);
-		
-		public void map(Object key, Text value, Context context
-				) throws IOException, InterruptedException {
+
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
@@ -56,48 +55,52 @@ public class TopkCommonWords{
 			}
 		}
 	}
-	
-  public static class IntSumReducer
-       extends Reducer<Text, IntWritable, Text, IntWritable> {
-    private IntWritable result = new IntWritable();
 
-    public void reduce(Text key, Iterable<IntWritable> values,
-                       Context context
-                       ) throws IOException, InterruptedException {
-      int firstFreq = 0;
-      int secondFreq = 0;
-      
-      for (IntWritable val : values) {
-        if (val.get() == 1) {
-        	firstFreq++;
-        	System.out.println("key : " + key + " value : " + val.get());
-        } else {
-        	secondFreq++;
-        	System.out.println("key : " + key + " value : " + val.get());
-        }
-      }
-      System.out.println("firstFreq : " + firstFreq + " secondFreq : " + secondFreq);
-      if (firstFreq > 0 && secondFreq > 0) {
-        result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
-        System.out.println("writing result for word : " + key);
-        context.write(key, result);
-      }
-    }
-  }
+	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-  public static void main(String[] args) throws Exception {
-    Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "top common words");
-    job.setJarByClass(TopkCommonWords.class);
+		public static final Log log = LogFactory.getLog(IntSumReducer.class);
+		
+		private IntWritable result = new IntWritable();
+
+		public void reduce(Text key, Iterable<IntWritable> values, Context context)
+				throws IOException, InterruptedException {
+			int firstFreq = 0;
+			int secondFreq = 0;
+
+			for (IntWritable val : values) {
+				if (val.get() == 1) {
+					firstFreq++;
+					System.out.println("key : " + key + " value : " + val.get());
+					log.info("key : " + key + " value : " + val.get());
+				} else {
+					secondFreq++;
+					System.out.println("key : " + key + " value : " + val.get());
+					log.info("key : " + key + " value : " + val.get());
+				}
+			}
+			System.out.println("firstFreq : " + firstFreq + " secondFreq : " + secondFreq);
+			if (firstFreq > 0 && secondFreq > 0) {
+				result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
+				System.out.println("writing result for word : " + key);
+				log.info("writing result for word : " + key);
+				context.write(key, result);
+			}
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+		Job job = Job.getInstance(conf, "top common words");
+		job.setJarByClass(TopkCommonWords.class);
 //    job.setMapperClass(TokenizerMapper.class);
-    job.setCombinerClass(IntSumReducer.class);
-    job.setReducerClass(IntSumReducer.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(IntWritable.class);
-    MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
-    MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
-    // MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
-    FileOutputFormat.setOutputPath(job, new Path(args[3]));
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
-  }
+		job.setCombinerClass(IntSumReducer.class);
+		job.setReducerClass(IntSumReducer.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
+		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
+		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
+		// MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class);
+		FileOutputFormat.setOutputPath(job, new Path(args[3]));
+		System.exit(job.waitForCompletion(true) ? 0 : 1);
+	}
 }
