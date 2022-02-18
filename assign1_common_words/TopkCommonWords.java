@@ -3,7 +3,6 @@
 // References : 
 // WordCount.java
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
-// https://stackoverflow.com/questions/19012482/how-to-get-the-input-file-name-in-the-mapper-in-a-hadoop-program
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -87,7 +86,7 @@ public class TopkCommonWords{
     Configuration conf = new Configuration();
     Job job = Job.getInstance(conf, "top common words");
     job.setJarByClass(TopkCommonWords.class);
-    job.setMapperClass(TokenizerMapper.class);
+//    job.setMapperClass(TokenizerMapper.class);
     job.setCombinerClass(IntSumReducer.class);
     job.setReducerClass(IntSumReducer.class);
     job.setOutputKeyClass(Text.class);
