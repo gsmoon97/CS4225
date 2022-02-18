@@ -22,49 +22,18 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 public class TopkCommonWords {
 	
-	public static class TokenizerMapper3 extends Mapper<Object, Text, Text, IntWritable> {
-
-		private final static IntWritable one = new IntWritable(1);
-		private Text word = new Text();
-
-		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
-			}
-		}
-	}
-	
-	public static class TokenizerMapper4 extends Mapper<Object, Text, Text, IntWritable> {
-
-		private final static IntWritable one = new IntWritable(1);
-		private Text word = new Text();
-
-		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-			StringTokenizer itr = new StringTokenizer(value.toString());
-			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
-			}
-		}
-	}
-
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
 		
 		private Text word = new Text();
-		private IntWritable isFirstFile = new IntWritable(1);
+		private IntWritable whichFile = new IntWritable(1);
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, isFirstFile);
+				context.write(word, whichFile);
 			}
 		}
 	}
@@ -72,56 +41,41 @@ public class TopkCommonWords {
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
 
 		private Text word = new Text();
-		private IntWritable isFirstFile = new IntWritable(0);
+		private IntWritable whichFile = new IntWritable(2);
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, isFirstFile);
+				context.write(word, whichFile);
 			}
 		}
 	}
 
 	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
-
-		public static final Log log = LogFactory.getLog(IntSumReducer.class);
 		
 		private IntWritable result = new IntWritable();
 
-//		public void reduce(Text key, Iterable<IntWritable> values, Context context)
-//				throws IOException, InterruptedException {
-//			int firstFreq = 0;
-//			int secondFreq = 0;
-//
-//			for (IntWritable val : values) {
-//				if (val.get() == 1) {
-//					firstFreq++;
-//					System.out.println("key : " + key + " value : " + val.get());
-//					log.info("key : " + key + " value : " + val.get());
-//				} else {
-//					secondFreq++;
-//					System.out.println("key : " + key + " value : " + val.get());
-//					log.info("key : " + key + " value : " + val.get());
-//				}
-//			}
-//			System.out.println("firstFreq : " + firstFreq + " secondFreq : " + secondFreq);
-//			if (firstFreq > 0 && secondFreq > 0) {
-//				result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
-//				System.out.println("writing result for word : " + key);
-//				log.info("writing result for word : " + key);
-//				context.write(key, result);
-//			}
-//		}
-		
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			int sum = 0;
+			int firstFreq = 0;
+			int secondFreq = 0;
+
 			for (IntWritable val : values) {
-				sum += val.get();
+				if (val.get().equals(1)) {
+					firstFreq++;
+					System.out.println("key : " + key + " value : " + val.get());
+				} else {
+					secondFreq++;
+					System.out.println("key : " + key + " value : " + val.get());
+				}
 			}
-			result.set(sum);
-			context.write(key, result);
+			System.out.println("firstFreq : " + firstFreq + " secondFreq : " + secondFreq);
+			if (firstFreq > 0 && secondFreq > 0) {
+				result.set(firstFreq < secondFreq ? firstFreq : secondFreq);
+				System.out.println("writing result for word : " + key);
+				context.write(key, result);
+			}
 		}
 	}
 
