@@ -74,8 +74,8 @@ public class TopkCommonWords {
 					firstFreq++;
 				} else {
 					secondFreq++;
+					context.write(key, val);
 				}
-				context.write(key, val);
 			}
 //			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 //			
