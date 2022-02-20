@@ -73,10 +73,13 @@ public class TopkCommonWords {
 				int whichFile = val.get();
 				if (whichFile == 1) {
 					firstFreq++;
-					context.write(key, val);
 				} else {
 					secondFreq++;
 				}
+			}
+			if (key.equals(new Text("without"))) {
+				context.write(key, new IntWritable(firstFreq));
+				context.write(key, new IntWritable(secondFreq));
 			}
 //			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 //			
