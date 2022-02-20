@@ -76,12 +76,15 @@ public class TopkCommonWords {
 					secondFreq++;
 				}
 			}
-			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
-			
-			if (smallerFreq > 0) {
-				result.set(smallerFreq);
-				context.write(key, result);
-			}
+			result.set(1);
+			context.write(key, result);
+			context.write(key, result);
+//			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
+//			
+//			if (smallerFreq > 0) {
+//				result.set(smallerFreq);
+//				context.write(key, result);
+//			}
 //			if ((firstFreq > 0) && (secondFreq >= 0)) {
 //				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
 //				if (firstFreq > secondFreq) {
