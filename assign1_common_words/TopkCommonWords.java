@@ -71,18 +71,19 @@ public class TopkCommonWords {
 			
 			for (IntWritable val : values) {
 				int whichFile = val.get();
-				if (Integer.compare(whichFile, 1) == 0) {
+				if (whichFile == 1) {
 					firstFreq++;
+					context.write(key, val);
 				} else {
 					secondFreq++;
 				}
 			}
-			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
-			
-			if (smallerFreq > 0) {
-				result.set(smallerFreq);
-				context.write(key, result);
-			}
+//			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
+//			
+//			if (smallerFreq > 0) {
+//				result.set(smallerFreq);
+//				context.write(key, result);
+//			}
 //			if ((firstFreq > 0) && (secondFreq >= 0)) {
 //				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
 //				if (firstFreq > secondFreq) {
