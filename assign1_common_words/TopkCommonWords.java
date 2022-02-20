@@ -25,12 +25,15 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class TopkCommonWords {
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
+		
 		Set<String> stopwords = new HashSet<String>();
+		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
 			Path path = new Path(conf.get("stopwords.path"));
 		}
+		
 		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(1);
 
@@ -44,7 +47,7 @@ public class TopkCommonWords {
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
-
+		
 		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(2);
 
@@ -63,22 +66,19 @@ public class TopkCommonWords {
 
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			int firstFreq = 0;
-			int secondFreq = 0;
-			int sum = 0;
-			
-			for (IntWritable val : values) {
+//			int firstFreq = 0;
+//			int secondFreq = 0;
+//			int sum = 0;
+//			
+//			for (IntWritable val : values) {
 //				if (val.equals(new IntWritable(1))) {
 //					firstFreq++;
 //				} else {
 //					secondFreq++;
 //				}
-				if (val.equals(new IntWritable(2))) {
-					sum += val.get();
-				} 
-			}
-			result.set(sum);
-			context.write(key, result);
+//			}
+//			result.set(sum);
+//			context.write(key, result);
 //			if ((firstFreq > 0) && (secondFreq >= 0)) {
 ////				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
 //				if (firstFreq > secondFreq) {
@@ -88,6 +88,8 @@ public class TopkCommonWords {
 //				}
 //				context.write(key, result);
 //			}
+			result.set(1);
+			context.write(key, result);
 		}
 	}
 
