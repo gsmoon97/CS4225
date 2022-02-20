@@ -70,17 +70,21 @@ public class TopkCommonWords {
 			int secondFreq = 0;
 			
 			for (IntWritable val : values) {
-				int whichFile = val.get();
-				if (whichFile == 1) {
-					firstFreq++;
-				} else {
-					secondFreq++;
+				if (key.equals(new Text("without"))) {
+					int whichFile = val.get();
+					if (whichFile == 1) {
+						firstFreq++;
+						context.write(key, new IntWritable(firstFreq));
+					} else {
+						secondFreq++;
+					}
 				}
+				
 			}
-			if (key.equals(new Text("without"))) {
-				context.write(key, new IntWritable(firstFreq));
-				context.write(key, new IntWritable(secondFreq));
-			}
+//			if (key.equals(new Text("without"))) {
+//				context.write(key, new IntWritable(firstFreq));
+//				context.write(key, new IntWritable(secondFreq));
+//			}
 //			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 //			
 //			if (smallerFreq > 0) {
