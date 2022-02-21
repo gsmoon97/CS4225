@@ -41,7 +41,7 @@ public class TopkCommonWords {
 			}
 		}
 		
-		private org.w3c.dom.Text word = new Text();
+		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(1);
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
