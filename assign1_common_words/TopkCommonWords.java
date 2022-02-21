@@ -56,6 +56,8 @@ public class TopkCommonWords {
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
+		HashSet<String> stopwords = new HashSet<>();
+		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -84,7 +86,7 @@ public class TopkCommonWords {
 	}
 
 	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
-		private TreeMap<Integer, String> tmap;
+//		private TreeMap<Integer, String> tmap;
 		private Map<String, Integer> wordMap;
 		private int topK = 20;
 
@@ -119,15 +121,20 @@ public class TopkCommonWords {
 		public void cleanup(Context context) 
 				throws IOException, InterruptedException {
 			while (topK > 0) {
-				int maxFreq = Collections.max(wordMap);
-				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<>(wordMap.entrySet().stream().filter(e -> e.getValue() == maxFreq));
+				int maxFreq = Collections.max(wordMap.values());
+				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<Map.Entry<String, Integer>>(
+						wordMap
+						.entrySet()
+						.stream()
+						.filter(e -> e.getValue() == maxFreq)
+						);
 				Collections.sort(maxFreqWords, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
 				for (Map.Entry<String, Integer> e : maxFreqWords) {
 					if(topK < 0) {
 						return;
 					}
-					Text word = new Text(e.getValue());
-					IntWritable freq = new IntWritable(e.getKey());
+					Text word = new Text(e.getKey());
+					IntWritable freq = new IntWritable(e.getValue());
 					context.write(freq, word);
 					topK--;
 				}
