@@ -1,10 +1,11 @@
 // Matric Number: A0210908L
 // Name: Moon Geonsik
 // References : 
-// WordCount.java
-// https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
-// https://stackoverflow.com/questions/26209773/hadoop-map-reduce-read-a-text-file
-// https://www.geeksforgeeks.org/how-to-find-top-n-records-using-mapreduce/
+// 	WordCount.java
+// 	https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
+// 	https://stackoverflow.com/questions/26209773/hadoop-map-reduce-read-a-text-file
+// 	https://stackoverflow.com/questions/5911174/finding-key-associated-with-max-value-in-a-java-map
+// 	https://stackoverflow.com/questions/21105413/java-java-util-map-entry-and-collection-sortlist-comparator
 
 import java.io.*;
 import java.util.*;
@@ -24,9 +25,9 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class TopkCommonWords {
+	HashSet<String> stopwords = new HashSet<>();
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
-		Set<String> stopwords = new HashSet<>();
 		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
@@ -48,7 +49,7 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString()) || word.toString().equals("He") || word.toString().equals("he")) {
+				if(!stopwords.contains(word.toString())) {
 					context.write(word, whichFile);
 				}
 			}
@@ -56,7 +57,6 @@ public class TopkCommonWords {
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
-		Set<String> stopwords = new HashSet<>();
 		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
@@ -78,21 +78,29 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString()) || word.toString().equals("He") || word.toString().equals("he")) {
+				if(!stopwords.contains(word.toString())) {
 					context.write(word, whichFile);
 				}
 			}
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
-//		private IntWritable result = new IntWritable();
+	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		private TreeMap<Integer, String> tmap;
+		private Map<String, Integer> wordMap;
+		private topK = 20;
+		
+		private <K, V extends Comparable<V>> V popKeyWithMaxValue(Map<K, V> map) {
+	        Entry<K, V> maxEntry = Collections.max(map.entrySet(), (Entry<K, V> e1, Entry<K, V> e2) -> e1.getValue()
+	            .compareTo(e2.getValue()));
+	        return maxEntry.getKey();
+	    }
 
 		@Override
 	    public void setup(Context context) 
 	    		throws IOException, InterruptedException {
-	        tmap = new TreeMap<Integer, String>(Collections.reverseOrder());
+//	        tmap = new TreeMap<Integer, String>(Collections.reverseOrder());
+			wordMap = new HashMap<>();
 	    }
 		
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
@@ -107,27 +115,40 @@ public class TopkCommonWords {
 					secondFreq++;
 				}
 			}
-			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 			
+			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 			if (smallerFreq > 0) {
-//				result.set(smallerFreq);
-//				context.write(result, key);
-				tmap.put(smallerFreq, key.toString());
-				if (tmap.size() > 20) {
-					tmap.remove(tmap.firstKey());
-				}
+//				tmap.put(key.toString(), smallerFreq);
+				wordMap.put(key.toString(), smallerFreq);
 			}
 		}
 		
 		@Override
 		public void cleanup(Context context) 
 				throws IOException, InterruptedException {
-			context.write(new IntWritable(tmap.size()), new Text("Map Size"));
-			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
-				Text word = new Text(ent.getValue());
-				IntWritable freq = new IntWritable(ent.getKey());
-				context.write(freq, word);
+			while (topK > 0) {
+				int maxFreq = Collections.max(wordMap);
+				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<>(wordMap.entrySet().stream().filter(e -> e.getValue() == maxFreq));
+				Collections.sort(maxFreqWords, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
+				for (Map.Entry<String, Integer> e : maxFreqWords) {
+					if(topK < 0) {
+						return;
+					}
+					Text word = new Text(e.getValue());
+					IntWritable freq = new IntWritable(e.getKey());
+					context.write(freq, word);
+					topK--;
+				}
+				wordMap.entrySet().removeIf(e -> e.getValue() == maxFreq);
 			}
+//			context.write(new IntWritable(tmap.size()), new Text("Map Size")); // to be commented
+//			int topK = 20;
+//			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
+//				Text word = new Text(ent.getValue());
+//				IntWritable freq = new IntWritable(ent.getKey());
+//				context.write(freq, word);
+//			}
+			
 		}
 	}
 
