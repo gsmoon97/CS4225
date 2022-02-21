@@ -41,14 +41,14 @@ public class TopkCommonWords {
 			}
 		}
 		
-		private Text word = new Text();
+		private org.w3c.dom.Text word = new Text();
 		private IntWritable whichFile = new IntWritable(1);
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString())) {
+				if(!stopwords.contains(word.toString() || word.toString().equals("He") || word.toString().equals("he"))) {
 					context.write(word, whichFile);
 				}
 			}
@@ -65,7 +65,7 @@ public class TopkCommonWords {
 			FileSystem fs = FileSystem.get(new Configuration());
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
 			String stopword = br.readLine();
-			while (stopword != null) {
+			if(!stopwords.contains(word.toString() || word.toString().equals("He") || word.toString().equals("he"))) {
 				stopwords.add(stopword);
 				stopword = br.readLine();
 			}
