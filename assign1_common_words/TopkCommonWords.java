@@ -4,6 +4,7 @@
 // WordCount.java
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
 // https://stackoverflow.com/questions/26209773/hadoop-map-reduce-read-a-text-file
+// https://www.geeksforgeeks.org/how-to-find-top-n-records-using-mapreduce/
 
 import java.io.*;
 import java.util.*;
@@ -88,9 +89,10 @@ public class TopkCommonWords {
 
 	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
 		
-		private IntWritable result = new IntWritable();
+//		private IntWritable result = new IntWritable();
+		private TreeMap<Integer, String> tmap;
 
-		public void reduce(Text key, Iterable<IntWritable> values, Context context)
+		public void reduce(org.w3c.dom.Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
 			int firstFreq = 0;
 			int secondFreq = 0;
@@ -105,8 +107,22 @@ public class TopkCommonWords {
 			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 			
 			if (smallerFreq > 0) {
-				result.set(smallerFreq);
-				context.write(result, key);
+//				result.set(smallerFreq);
+//				context.write(result, key);
+				tmap.put(smallerFreq, key.toString());
+				if (tmap.size() > 20) {
+					tmap.remove(tmap.firstKey());
+				}
+			}
+		}
+		
+		@Override
+		public void cleanup(Context context) 
+				throws IOException, InterruptedException {
+			for (Entry e : tmap.entrySet()) {
+				Text word = new Text(e.getValue());
+				IntWritable freq = new IntWritable(e.getKey());
+				context.write(freq, word);
 			}
 		}
 	}
