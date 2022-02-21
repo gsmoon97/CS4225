@@ -87,14 +87,12 @@ public class TopkCommonWords {
 	}
 
 	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
-//		private TreeMap<Integer, String> tmap;
 		private Map<String, Integer> wordMap;
 		private int topK = 20;
 
 		@Override
 	    public void setup(Context context) 
 	    		throws IOException, InterruptedException {
-//	        tmap = new TreeMap<Integer, String>(Collections.reverseOrder());
 			wordMap = new HashMap<>();
 	    }
 		
@@ -113,7 +111,6 @@ public class TopkCommonWords {
 			
 			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 			if (smallerFreq > 0) {
-//				tmap.put(key.toString(), smallerFreq);
 				wordMap.put(key.toString(), smallerFreq);
 			}
 		}
@@ -123,13 +120,15 @@ public class TopkCommonWords {
 				throws IOException, InterruptedException {
 			while (topK > 0) {
 				int maxFreq = Collections.max(wordMap.values());
+				
 				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<>();
 				wordMap
 					.entrySet()
 					.stream()
 					.filter(e -> e.getValue() == maxFreq)
 					.forEach(e -> maxFreqWords.add(e));
-				Collections.sort(maxFreqWords, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
+				Collections.sort(maxFreqWords, (e1, e2) -> e2.getKey().compareTo(e1.getKey())); // lexicographical order
+				
 				for (Map.Entry<String, Integer> e : maxFreqWords) {
 					if(topK < 0) {
 						return;
@@ -141,13 +140,6 @@ public class TopkCommonWords {
 				}
 				wordMap.entrySet().removeIf(e -> e.getValue() == maxFreq);
 			}
-//			context.write(new IntWritable(tmap.size()), new Text("Map Size")); // to be commented
-//			int topK = 20;
-//			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
-//				Text word = new Text(ent.getValue());
-//				IntWritable freq = new IntWritable(ent.getKey());
-//				context.write(freq, word);
-//			}
 			
 		}
 	}
