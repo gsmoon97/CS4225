@@ -46,7 +46,7 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString())) {
+				if(stopwords.contains(word.toString())) {
 					context.write(word, whichFile);
 				}
 			}
@@ -76,7 +76,7 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString())) {
+				if(stopwords.contains(word.toString())) {
 					context.write(word, whichFile);
 				}
 			}
