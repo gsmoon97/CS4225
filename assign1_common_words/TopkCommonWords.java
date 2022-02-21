@@ -119,27 +119,36 @@ public class TopkCommonWords {
 		@Override
 		public void cleanup(Context context) 
 				throws IOException, InterruptedException {
-			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
-				Text word = new Text(ent.getValue());
-				IntWritable freq = new IntWritable(ent.getKey());
-				context.write(freq, word);
-			}
+			context.write(new IntWritable(tmap.size()), new Text('Map Size'));
+//			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
+//				Text word = new Text(ent.getValue());
+//				IntWritable freq = new IntWritable(ent.getKey());
+//				context.write(freq, word);
+//			}
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
+		
 		Configuration conf = new Configuration();
 		conf.set("stopwords.path", args[2]);
+		
 		Job job = Job.getInstance(conf, "top common words");
 		job.setJarByClass(TopkCommonWords.class);
-		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
-		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
+		
 		job.setReducerClass(IntSumReducer.class);
+		
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
+		
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
+		
+		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
+		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
+		
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
+		
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
