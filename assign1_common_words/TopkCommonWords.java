@@ -48,7 +48,7 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString() || word.toString().equals("He") || word.toString().equals("he"))) {
+				if(!stopwords.contains(word.toString()) || word.toString().equals("He") || word.toString().equals("he")) {
 					context.write(word, whichFile);
 				}
 			}
@@ -65,7 +65,7 @@ public class TopkCommonWords {
 			FileSystem fs = FileSystem.get(new Configuration());
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
 			String stopword = br.readLine();
-			if(!stopwords.contains(word.toString() || word.toString().equals("He") || word.toString().equals("he"))) {
+			while (stopword != null) {
 				stopwords.add(stopword);
 				stopword = br.readLine();
 			}
@@ -78,7 +78,7 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				if(!stopwords.contains(word.toString())) {
+				if(!stopwords.contains(word.toString()) || word.toString().equals("He") || word.toString().equals("he")) {
 					context.write(word, whichFile);
 				}
 			}
