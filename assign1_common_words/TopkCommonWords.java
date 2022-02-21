@@ -122,12 +122,12 @@ public class TopkCommonWords {
 				throws IOException, InterruptedException {
 			while (topK > 0) {
 				int maxFreq = Collections.max(wordMap.values());
-				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<Map.Entry<String, Integer>>(
-						wordMap
-						.entrySet()
-						.stream()
-						.filter(e -> e.getValue() == maxFreq)
-						);
+				List<Map.Entry<String, Integer>> maxFreqWords = new ArrayList<>();
+				wordMap
+					.entrySet()
+					.stream()
+					.filter(e -> e.getValue() == maxFreq)
+					.forEach(e -> maxFreqWords.add(e));
 				Collections.sort(maxFreqWords, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
 				for (Map.Entry<String, Integer> e : maxFreqWords) {
 					if(topK < 0) {
