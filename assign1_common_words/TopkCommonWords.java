@@ -92,7 +92,7 @@ public class TopkCommonWords {
 //		private IntWritable result = new IntWritable();
 		private TreeMap<Integer, String> tmap;
 
-		public void reduce(org.w3c.dom.Text key, Iterable<IntWritable> values, Context context)
+		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
 			int firstFreq = 0;
 			int secondFreq = 0;
