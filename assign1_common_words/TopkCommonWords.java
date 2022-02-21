@@ -5,8 +5,7 @@
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
 // https://stackoverflow.com/questions/42048028/mapreduce-use-hadoop-configuration-object-to-read-in-a-text-file
 
-import java.io.IOException;
-import java.util.StringTokenizer;
+import java.io;
 import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +31,12 @@ public class TopkCommonWords {
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
 			Path path = new Path(conf.get("stopwords.path"));
+			FileSystem fs= FileSystem.get(new Configuration());
+			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
+			String word = null;
+			while ((word= br.readLine())!= null) {
+				stopwords.add(word);
+			}
 		}
 		
 		private Text word = new Text();
@@ -41,12 +46,28 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, whichFile);
+				if(!stopwords.contains(word.toString())) {
+					context.write(word, whichFile);
+				}
 			}
 		}
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
+		
+		Set<String> stopwords = new HashSet<String>();
+		
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException {
+			Configuration conf = context.getConfiguration();
+			Path path = new Path(conf.get("stopwords.path"));
+			FileSystem fs= FileSystem.get(new Configuration());
+			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
+			String word = null;
+			while ((word= br.readLine())!= null) {
+				stopwords.add(word);
+			}
+		}
 		
 		private Text word = new Text();
 		private IntWritable whichFile = new IntWritable(2);
@@ -55,7 +76,9 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, whichFile);
+				if(!stopwords.contains(word.toString())) {
+					context.write(word, whichFile);
+				}
 			}
 		}
 	}
@@ -66,24 +89,15 @@ public class TopkCommonWords {
 
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			int firstFreq = 0;
-			int secondFreq = 0;
-			
-			for (IntWritable val : values) {
-				if (key.equals(new Text("without"))) {
-					int whichFile = val.get();
-					if (whichFile == 1) {
-						firstFreq++;
-						context.write(key, new IntWritable(firstFreq));
-					} else {
-						secondFreq++;
-					}
-				}
-				
-			}
-//			if (key.equals(new Text("without"))) {
-//				context.write(key, new IntWritable(firstFreq));
-//				context.write(key, new IntWritable(secondFreq));
+//			int firstFreq = 0;
+//			int secondFreq = 0;
+//			
+//			for (IntWritable val : values) {
+//				if (val.get() == 1) {
+//					firstFreq++;
+//				} else {
+//					secondFreq++;
+//				}
 //			}
 //			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
 //			
@@ -91,15 +105,8 @@ public class TopkCommonWords {
 //				result.set(smallerFreq);
 //				context.write(key, result);
 //			}
-//			if ((firstFreq > 0) && (secondFreq >= 0)) {
-//				result.set((firstFreq < secondFreq) ? firstFreq : secondFreq);
-//				if (firstFreq > secondFreq) {
-//					result.set(firstFreq);
-//				} else {
-//					result.set(secondFreq);
-//				}
-//				context.write(key, result);
-//			}
+			result.set(1);
+			context.write(key, result);
 		}
 	}
 
