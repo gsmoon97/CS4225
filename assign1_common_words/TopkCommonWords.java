@@ -3,14 +3,14 @@
 // References : 
 // WordCount.java
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
-// https://stackoverflow.com/questions/42048028/mapreduce-use-hadoop-configuration-object-to-read-in-a-text-file
+// https://stackoverflow.com/questions/26209773/hadoop-map-reduce-read-a-text-file
 
 import java.io.*;
 import java.util.*;
-import org.apache.hadoop.fs.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -26,17 +26,18 @@ public class TopkCommonWords {
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
 		
-		Set<String> stopwords = new HashSet<String>();
+		Set<String> stopwords = new HashSet<>();
 		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
 			Path path = new Path(conf.get("stopwords.path"));
-			FileSystem fs= FileSystem.get(new Configuration());
+			FileSystem fs = FileSystem.get(new Configuration());
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
-			String word = null;
-			while ((word= br.readLine())!= null) {
-				stopwords.add(word);
+			String stopword = br.readLine();
+			while (stopword != null) {
+				stopwords.add(stopword);
+				stopword = br.readLine();
 			}
 		}
 		
@@ -56,17 +57,18 @@ public class TopkCommonWords {
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
 		
-		Set<String> stopwords = new HashSet<String>();
+		Set<String> stopwords = new HashSet<>();
 		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
 			Path path = new Path(conf.get("stopwords.path"));
-			FileSystem fs= FileSystem.get(new Configuration());
+			FileSystem fs = FileSystem.get(new Configuration());
 			BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path))); 
-			String word = null;
-			while ((word= br.readLine())!= null) {
-				stopwords.add(word);
+			String stopword = br.readLine();
+			while (stopword != null) {
+				stopwords.add(stopword);
+				stopword = br.readLine();
 			}
 		}
 		
