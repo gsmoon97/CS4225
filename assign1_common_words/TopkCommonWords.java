@@ -43,7 +43,7 @@ public class TopkCommonWords {
 		}
 		
 		private Text word = new Text();
-		private IntWritable whichFile = new IntWritable(1);
+		private IntWritable whichFile = new IntWritable(1); // first file
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
@@ -73,7 +73,7 @@ public class TopkCommonWords {
 		}
 		
 		private Text word = new Text();
-		private IntWritable whichFile = new IntWritable(2);
+		private IntWritable whichFile = new IntWritable(2); // second file
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 			StringTokenizer itr = new StringTokenizer(value.toString());
@@ -109,7 +109,7 @@ public class TopkCommonWords {
 				}
 			}
 			
-			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
+			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq; // consider the smaller frequency
 			if (smallerFreq > 0) {
 				wordMap.put(key.toString(), smallerFreq);
 			}
@@ -126,16 +126,16 @@ public class TopkCommonWords {
 					.entrySet()
 					.stream()
 					.filter(e -> e.getValue() == maxFreq)
-					.forEach(e -> maxFreqWords.add(e));
-				Collections.sort(maxFreqWords, (e1, e2) -> e2.getKey().compareTo(e1.getKey())); // lexicographical order
+					.forEach(e -> maxFreqWords.add(e)); // common words with maximum frequency
+				Collections.sort(maxFreqWords, (e1, e2) -> e2.getKey().compareTo(e1.getKey())); // descending lexicographic order
 				
 				for (Map.Entry<String, Integer> e : maxFreqWords) {
 					if(topK < 0) {
-						return;
+						return; // return top 20 common words
 					}
 					Text word = new Text(e.getKey());
 					IntWritable freq = new IntWritable(e.getValue());
-					context.write(freq, word);
+					context.write(freq, word); //swap the order for output
 					topK--;
 				}
 				wordMap.entrySet().removeIf(e -> e.getValue() == maxFreq);
