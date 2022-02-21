@@ -106,7 +106,7 @@ public class TopkCommonWords {
 			
 			if (smallerFreq > 0) {
 				result.set(smallerFreq);
-				context.write(key, result);
+				context.write(result, key);
 			}
 		}
 	}
