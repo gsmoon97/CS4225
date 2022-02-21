@@ -7,7 +7,7 @@
 
 import java.io.*;
 import java.util.*;
-import java.nio.file.FileSystem;
+import java.lang.Object;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
