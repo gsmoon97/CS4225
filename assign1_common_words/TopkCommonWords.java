@@ -47,10 +47,9 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, whichFile);
-//				if(stopwords.contains(word.toString())) {
-//					context.write(word, whichFile);
-//				}
+				if(!stopwords.contains(word.toString())) {
+					context.write(word, whichFile);
+				}
 			}
 		}
 	}
@@ -78,10 +77,9 @@ public class TopkCommonWords {
 			StringTokenizer itr = new StringTokenizer(value.toString());
 			while (itr.hasMoreTokens()) {
 				word.set(itr.nextToken());
-				context.write(word, whichFile);
-//				if(stopwords.contains(word.toString())) {
-//					context.write(word, whichFile);
-//				}
+				if(!stopwords.contains(word.toString())) {
+					context.write(word, whichFile);
+				}
 			}
 		}
 	}
