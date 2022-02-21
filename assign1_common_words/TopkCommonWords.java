@@ -92,7 +92,7 @@ public class TopkCommonWords {
 		@Override
 	    public void setup(Context context) 
 	    		throws IOException, InterruptedException {
-	        tmap = new TreeMap<Integer, String>();
+	        tmap = new TreeMap<Integer, String>(Collections.reverseOrder());
 	    }
 		
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
