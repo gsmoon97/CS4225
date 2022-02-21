@@ -119,9 +119,9 @@ public class TopkCommonWords {
 		@Override
 		public void cleanup(Context context) 
 				throws IOException, InterruptedException {
-			for (Entry e : tmap.entrySet()) {
-				Text word = new Text(e.getValue());
-				IntWritable freq = new IntWritable(e.getKey());
+			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
+				Text word = new Text(ent.getValue());
+				IntWritable freq = new IntWritable(ent.getKey());
 				context.write(freq, word);
 			}
 		}
