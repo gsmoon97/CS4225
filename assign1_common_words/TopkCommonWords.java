@@ -120,8 +120,9 @@ public class TopkCommonWords {
 		job.setJarByClass(TopkCommonWords.class);
 		MultipleInputs.addInputPath(job, new Path(args[0]), TextInputFormat.class, TokenizerMapper1.class);
 		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
-		job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(IntWritable.class);
 		job.setOutputKeyClass(IntWritable.class);
 		job.setOutputValueClass(Text.class);
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
