@@ -92,24 +92,22 @@ public class TopkCommonWords {
 
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-//			int firstFreq = 0;
-//			int secondFreq = 0;
-//			
-//			for (IntWritable val : values) {
-//				if (val.get() == 1) {
-//					firstFreq++;
-//				} else {
-//					secondFreq++;
-//				}
-//			}
-//			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
-//			
-//			if (smallerFreq > 0) {
-//				result.set(smallerFreq);
-//				context.write(key, result);
-//			}
-			result.set(1);
-			context.write(result, key);
+			int firstFreq = 0;
+			int secondFreq = 0;
+			
+			for (IntWritable val : values) {
+				if (val.get() == 1) {
+					firstFreq++;
+				} else {
+					secondFreq++;
+				}
+			}
+			int smallerFreq = (firstFreq < secondFreq) ? firstFreq : secondFreq;
+			
+			if (smallerFreq > 0) {
+				result.set(smallerFreq);
+				context.write(key, result);
+			}
 		}
 	}
 
