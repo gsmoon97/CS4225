@@ -28,7 +28,6 @@ public class TopkCommonWords {
 	HashSet<String> stopwords = new HashSet<>();
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
-		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -57,7 +56,6 @@ public class TopkCommonWords {
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
-		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -88,13 +86,7 @@ public class TopkCommonWords {
 	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		private TreeMap<Integer, String> tmap;
 		private Map<String, Integer> wordMap;
-		private topK = 20;
-		
-		private <K, V extends Comparable<V>> V popKeyWithMaxValue(Map<K, V> map) {
-	        Entry<K, V> maxEntry = Collections.max(map.entrySet(), (Entry<K, V> e1, Entry<K, V> e2) -> e1.getValue()
-	            .compareTo(e2.getValue()));
-	        return maxEntry.getKey();
-	    }
+		private int topK = 20;
 
 		@Override
 	    public void setup(Context context) 
