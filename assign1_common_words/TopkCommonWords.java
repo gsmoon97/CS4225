@@ -86,7 +86,7 @@ public class TopkCommonWords {
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
 		
 		private IntWritable result = new IntWritable();
 
@@ -109,7 +109,7 @@ public class TopkCommonWords {
 //				context.write(key, result);
 //			}
 			result.set(1);
-			context.write(key, result);
+			context.write(result, key);
 		}
 	}
 
@@ -122,8 +122,8 @@ public class TopkCommonWords {
 		MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, TokenizerMapper2.class);
 		job.setCombinerClass(IntSumReducer.class);
 		job.setReducerClass(IntSumReducer.class);
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		FileOutputFormat.setOutputPath(job, new Path(args[3]));
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
