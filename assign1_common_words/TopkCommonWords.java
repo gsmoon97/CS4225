@@ -26,7 +26,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class TopkCommonWords {
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
-		
 		Set<String> stopwords = new HashSet<>();
 		
 		@Override
@@ -57,7 +56,6 @@ public class TopkCommonWords {
 	}
 
 	public static class TokenizerMapper2 extends Mapper<Object, Text, Text, IntWritable> {
-		
 		Set<String> stopwords = new HashSet<>();
 		
 		@Override
@@ -88,10 +86,15 @@ public class TopkCommonWords {
 	}
 
 	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
-		
 //		private IntWritable result = new IntWritable();
 		private TreeMap<Integer, String> tmap;
 
+		@Override
+	    public void setup(Context context) 
+	    		throws IOException, InterruptedException {
+	        tmap = new TreeMap<Integer, String>();
+	    }
+		
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
 			int firstFreq = 0;
@@ -120,16 +123,15 @@ public class TopkCommonWords {
 		public void cleanup(Context context) 
 				throws IOException, InterruptedException {
 			context.write(new IntWritable(tmap.size()), new Text("Map Size"));
-//			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
-//				Text word = new Text(ent.getValue());
-//				IntWritable freq = new IntWritable(ent.getKey());
-//				context.write(freq, word);
-//			}
+			for (Map.Entry<Integer, String> ent : tmap.entrySet()) {
+				Text word = new Text(ent.getValue());
+				IntWritable freq = new IntWritable(ent.getKey());
+				context.write(freq, word);
+			}
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		
 		Configuration conf = new Configuration();
 		conf.set("stopwords.path", args[2]);
 		
