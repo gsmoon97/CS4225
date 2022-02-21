@@ -5,7 +5,7 @@
 // https://stackoverflow.com/questions/25432598/what-is-the-mapper-of-reducer-setup-used-for
 // https://stackoverflow.com/questions/42048028/mapreduce-use-hadoop-configuration-object-to-read-in-a-text-file
 
-import java.io;
+import java.io.*;
 import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
