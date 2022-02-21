@@ -25,9 +25,10 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class TopkCommonWords {
-	HashSet<String> stopwords = new HashSet<>();
 	
 	public static class TokenizerMapper1 extends Mapper<Object, Text, Text, IntWritable> {
+		HashSet<String> stopwords = new HashSet<>();
+		
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
 			Configuration conf = context.getConfiguration();
@@ -85,7 +86,7 @@ public class TopkCommonWords {
 		}
 	}
 
-	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class IntSumReducer extends Reducer<Text, IntWritable, IntWritable, Text> {
 //		private TreeMap<Integer, String> tmap;
 		private Map<String, Integer> wordMap;
 		private int topK = 20;
