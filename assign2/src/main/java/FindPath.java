@@ -14,14 +14,15 @@ import java.util.List;
 import java.util.UUID;
 
 public class FindPath {
-    // From: https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude
+    // From:
+    // https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude
     private static double distance(double lat1, double lat2, double lon1, double lon2) {
         final int R = 6371; // Radius of the earth
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+                        * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double distance = R * c * 1000; // convert to meters
         double height = 0; // For this assignment, we assume all locations have the same height.
@@ -29,66 +30,11 @@ public class FindPath {
         return Math.sqrt(distance);
     }
 
-    public static class Node implements Serializable {
-        private Long id;
-        private double lat;
-        private double lon;
-
-        public Node(Long id, double lat, double lon) {
-            this.id = id;
-            this.lat = lat;
-            this.lon = lon;
-        }
-
-        public Long getId() {
-            return this.id;
-        }
-
-        public double getLat() {
-            return this.lat;
-        }
-        
-        public double getLon() {
-            return this.lon;
-        }
-    }
-    
-    public static class Road implements Serializable {
-        private UUID id;
-        private Long src;
-        private Long dst;
-
-        public Road(Long src, Long dst) {
-            this.id = UUID.randomUUID();
-            this.src = src;
-            this.dst = dst;
-        }
-
-        public UUID getId() {
-            return this.id;
-        }
-        
-        public Long getSrc() {
-            return this.src;
-        }
-        
-        public Long getDst() {
-            return this.dst;
-        }
-    }
-
-    public static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        Long id = row.getAs("_id");
-        double lat = row.getAs("_lat");
-        double lon = row.getAs("_lon");
-        return new Node(id, lat, lon);
-    }; 
-
     public static void main(String[] args) {
         SparkSession spark = SparkSession
-            .builder()
-            .appName("BuildMap Application")
-            .getOrCreate();
+                .builder()
+                .appName("BuildMap Application")
+                .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
         for (int i = 0; i < nodeData.dtypes().length; i++) {
@@ -103,4 +49,59 @@ public class FindPath {
         }
         spark.stop();
     }
+
+    public static class Node implements Serializable {
+        private long id;
+        private double lat;
+        private double lon;
+
+        public Node(long id, double lat, double lon) {
+            this.id = id;
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        public long getId() {
+            return this.id;
+        }
+
+        public double getLat() {
+            return this.lat;
+        }
+
+        public double getLon() {
+            return this.lon;
+        }
+    }
+
+    public static class Road implements Serializable {
+        private UUID id;
+        private long src;
+        private long dst;
+
+        public Road(long src, long dst) {
+            this.id = UUID.randomUUID();
+            this.src = src;
+            this.dst = dst;
+        }
+
+        public UUID getId() {
+            return this.id;
+        }
+
+        public long getSrc() {
+            return this.src;
+        }
+
+        public long getDst() {
+            return this.dst;
+        }
+    }
+
+    public static MapFunction<Row, Node> mapToNode = (Row row) -> {
+        long id = row.getAs("_id");
+        double lat = row.getAs("_lat");
+        double lon = row.getAs("_lon");
+        return new Node(id, lat, lon);
+    };
 }
