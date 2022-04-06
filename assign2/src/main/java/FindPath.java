@@ -29,25 +29,25 @@ public class FindPath {
     }
 
     static class Node {
-        private double id;
-        private double lat;
-        private double lon;
+        private Long id;
+        private Long lat;
+        private Long lon;
 
-        public Node(double id, double lat, double lon) {
+        public Node(Long id, Long lat, Long lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public double getId() {
+        public Long getId() {
             return this.id;
         }
 
-        public double getLat() {
+        public Long getLat() {
             return this.lat;
         }
         
-        public double getLon() {
+        public Long getLon() {
             return this.lon;
         }
     }
@@ -81,8 +81,6 @@ public class FindPath {
     }; 
 
     public static void main(String[] args) {
-        
-
         SparkSession spark = SparkSession
             .builder()
             .appName("BuildMap Application")
