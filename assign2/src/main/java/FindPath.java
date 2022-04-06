@@ -33,7 +33,7 @@ public class FindPath {
             .appName("BuildMap Application")
             .getOrCreate();
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
-        roadData.select(functions.col("id"), functions.col("lat"), functions.col("lon")).show();
+        roadData.select(functions.col("_id"), functions.col("_lat"), functions.col("_lon")).show();
         spark.stop();
     }
 }
