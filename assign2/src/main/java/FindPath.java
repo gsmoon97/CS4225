@@ -54,6 +54,18 @@ public class FindPath {
         public double getLon() {
             return this.lon;
         }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public void setLat(double lat) {
+            this.lat = lat;
+        }
+
+        public void setLon(double lon) {
+            this.lon = lon;
+        }
     }
 
     public static class Road implements Serializable {
@@ -78,18 +90,36 @@ public class FindPath {
         public long getDst() {
             return this.dst;
         }
+
+        public void setSrc(long src) {
+            this.src = src;
+        }
+
+        public void setDst(long dst) {
+            this.dst = dst;
+        }
     }
 
-    public static MapFunction<Row, Node> mapToNode = (Row row) -> {
-        long id = row.getAs("_id");
-        double lat = row.getAs("_lat");
-        double lon = row.getAs("_lon");
-        System.out.println(id);
-        System.out.println(lat);
-        System.out.println(lon);
-        System.out.println();
-        return new Node(id, lat, lon);
+    public static class NodeMapper implements MapFunction<Row, Node> {
+        @Override
+        public Node call(Row row) throws Exception {
+            Node n = new Node();
+            n.setId(row.getAs("_id"));
+            n.setLat(row.getAs("_lat"));
+            n.setLon(row.getAs("_lon"));
+            return n;
+        }
     };
+    // public static MapFunction<Row, Node> mapToNode = (Row row) -> {
+    //     long id = row.getAs("_id");
+    //     double lat = row.getAs("_lat");
+    //     double lon = row.getAs("_lon");
+    //     System.out.println(id);
+    //     System.out.println(lat);
+    //     System.out.println(lon);
+    //     System.out.println();
+    //     return new Node(id, lat, lon);
+    // };
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession
@@ -101,13 +131,13 @@ public class FindPath {
         for (int i = 0; i < nodeData.dtypes().length; i++) {
             System.out.println(nodeData.dtypes()[i]);
         }
-        List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
-        // for (Node n : nodes) {
-        //     System.out.println(n.getId());
-        //     System.out.println(n.getLat());
-        //     System.out.println(n.getLon());
-        //     System.out.println();
-        // }
+        List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
+        for (Node n : nodes) {
+            System.out.println(n.getId());
+            System.out.println(n.getLat());
+            System.out.println(n.getLon());
+            System.out.println();
+        }
         spark.stop();
     }
 }
