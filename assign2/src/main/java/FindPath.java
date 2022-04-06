@@ -84,6 +84,10 @@ public class FindPath {
         long id = row.getAs("_id");
         double lat = row.getAs("_lat");
         double lon = row.getAs("_lon");
+        System.out.println(id);
+        System.out.println(lat);
+        System.out.println(lon);
+        System.out.println();
         return new Node(id, lat, lon);
     };
 
@@ -98,12 +102,12 @@ public class FindPath {
             System.out.println(nodeData.dtypes()[i]);
         }
         List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
-        for (Node n : nodes) {
-            System.out.println(n.getId());
-            System.out.println(n.getLat());
-            System.out.println(n.getLon());
-            System.out.println();
-        }
+        // for (Node n : nodes) {
+        //     System.out.println(n.getId());
+        //     System.out.println(n.getLat());
+        //     System.out.println(n.getLon());
+        //     System.out.println();
+        // }
         spark.stop();
     }
 }
