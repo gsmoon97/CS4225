@@ -30,30 +30,12 @@ public class FindPath {
         return Math.sqrt(distance);
     }
 
-    public static void main(String[] args) {
-        SparkSession spark = SparkSession
-                .builder()
-                .appName("BuildMap Application")
-                .getOrCreate();
-        Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
-        Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        for (int i = 0; i < nodeData.dtypes().length; i++) {
-            System.out.println(nodeData.dtypes()[i]);
-        }
-        List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
-        for (Node n : nodes) {
-            System.out.println(n.getId());
-            System.out.println(n.getLat());
-            System.out.println(n.getLon());
-            System.out.println();
-        }
-        spark.stop();
-    }
-
     public static class Node implements Serializable {
         private long id;
         private double lat;
         private double lon;
+
+        public Node() {};
 
         public Node(long id, double lat, double lon) {
             this.id = id;
@@ -104,4 +86,24 @@ public class FindPath {
         double lon = row.getAs("_lon");
         return new Node(id, lat, lon);
     };
+
+    public static void main(String[] args) {
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("BuildMap Application")
+                .getOrCreate();
+        Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
+        Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
+        for (int i = 0; i < nodeData.dtypes().length; i++) {
+            System.out.println(nodeData.dtypes()[i]);
+        }
+        List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
+        for (Node n : nodes) {
+            System.out.println(n.getId());
+            System.out.println(n.getLat());
+            System.out.println(n.getLon());
+            System.out.println();
+        }
+        spark.stop();
+    }
 }
