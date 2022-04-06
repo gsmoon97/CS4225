@@ -77,9 +77,9 @@ public class FindPath {
     }
 
     static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        double id = row.getAs("_id");
-        double lat = row.getAs("_lat");
-        double lon = row.getAs("_lon");
+        Double id = row.getAs("_id");
+        Double lat = row.getAs("_lat");
+        Double lon = row.getAs("_lon");
         return new Node(id, lat, lon);
     }; 
 
