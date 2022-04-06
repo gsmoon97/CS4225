@@ -32,7 +32,7 @@ public class FindPath {
             .builder()
             .appName("BuildMap Application")
             .getOrCreate();
-        Dataset<Row> df = spark.read().format("xml").option("rowTag", "way").load();
+        Dataset<Row> df = spark.read().format("xml").option("rowTag", "way").load("/Users/moon/Workspace/CS4225/assign2/data/NUS.osm");
         df.show();
         spark.stop();
     }
