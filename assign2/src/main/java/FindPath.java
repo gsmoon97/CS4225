@@ -6,6 +6,7 @@ import org.graphframes.lib.AggregateMessages;
 import scala.Tuple2;
 import scala.Tuple3;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +29,7 @@ public class FindPath {
         return Math.sqrt(distance);
     }
 
-    static public class Node {
+    public static class Node implements Serializable {
         private long id;
         private double lat;
         private double lon;
@@ -52,7 +53,7 @@ public class FindPath {
         }
     }
     
-    static public class Road {
+    public static class Road implements Serializable {
         private UUID id;
         private long src;
         private long dst;
@@ -76,7 +77,7 @@ public class FindPath {
         }
     }
 
-    static MapFunction<Row,Node> mapToNode = (Row row) -> {
+    public static MapFunction<Row,Node> mapToNode = (Row row) -> {
         long id = row.getAs("_id");
         double lat = row.getAs("_lat");
         double lon = row.getAs("_lon");
