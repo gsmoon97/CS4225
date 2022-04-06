@@ -30,17 +30,17 @@ public class FindPath {
     }
 
     public static class Node implements Serializable {
-        private long id;
+        private Long id;
         private double lat;
         private double lon;
 
-        public Node(long id, double lat, double lon) {
+        public Node(Long id, double lat, double lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public long getId() {
+        public Long getId() {
             return this.id;
         }
 
@@ -55,10 +55,10 @@ public class FindPath {
     
     public static class Road implements Serializable {
         private UUID id;
-        private long src;
-        private long dst;
+        private Long src;
+        private Long dst;
 
-        public Road(long src, long dst) {
+        public Road(Long src, Long dst) {
             this.id = UUID.randomUUID();
             this.src = src;
             this.dst = dst;
@@ -68,17 +68,17 @@ public class FindPath {
             return this.id;
         }
         
-        public long getSrc() {
+        public Long getSrc() {
             return this.src;
         }
         
-        public long getDst() {
+        public Long getDst() {
             return this.dst;
         }
     }
 
     public static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        long id = row.getAs("_id");
+        Long id = row.getAs("_id");
         double lat = row.getAs("_lat");
         double lon = row.getAs("_lon");
         return new Node(id, lat, lon);
