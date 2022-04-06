@@ -90,7 +90,8 @@ public class FindPath {
             .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        System.out.println(nodeData.dtypes());
+        System.out.println(nodeData.dtypes()[0]);
+        System.out.println(nodeData.dtypes()[1]);
         List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
         for (Node n : nodes) {
             System.out.println(n.getId());
