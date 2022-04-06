@@ -28,15 +28,12 @@ public class FindPath {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            System.out.println(args[i]);
-        }
         SparkSession spark = SparkSession
             .builder()
             .appName("BuildMap Application")
             .getOrCreate();
-        Dataset<Row> df = spark.read().format("xml").option("rowTag", "way").load("input/NUS.osm");
-        df.show();
+        Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
+        roadData.select(functions.col("id"), functions.col("lat"), functions.col("lon")).show();
         spark.stop();
     }
 }
