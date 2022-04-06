@@ -77,7 +77,10 @@ public class FindPath {
     }
 
     static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        return new Node((double)row.getAs("_id"), (double)row.getAs("_lat"), (double)row.getAs("_lon"));
+        double id = row.getAs("_id");
+        double lat = row.getAs("_lat");
+        double lon = row.getAs("_lon");
+        return new Node(id, lat, lon);
     }; 
 
     public static void main(String[] args) {
@@ -89,6 +92,7 @@ public class FindPath {
             .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
+        roadData.select("_id").show();
         List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
         for (Node n : nodes) {
             System.out.println(n.getId());
