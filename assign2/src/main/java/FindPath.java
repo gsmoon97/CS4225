@@ -28,7 +28,7 @@ public class FindPath {
         return Math.sqrt(distance);
     }
 
-    static class Node {
+    static public class Node {
         private long id;
         private double lat;
         private double lon;
@@ -52,7 +52,7 @@ public class FindPath {
         }
     }
     
-    private class Road {
+    static public class Road {
         private UUID id;
         private long src;
         private long dst;
