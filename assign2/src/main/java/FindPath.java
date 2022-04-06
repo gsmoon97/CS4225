@@ -28,11 +28,12 @@ public class FindPath {
     }
 
     public static void main(String[] args) {
+        System.out.println(args);
         SparkSession spark = SparkSession
             .builder()
             .appName("BuildMap Application")
             .getOrCreate();
-        Dataset<Row> df = spark.read().format("xml").option("rowTag", "way").load("/Users/moon/Workspace/CS4225/assign2/data/NUS.osm");
+        Dataset<Row> df = spark.read().format("xml").option("rowTag", "way").load("input/NUS.osm");
         df.show();
         spark.stop();
     }
