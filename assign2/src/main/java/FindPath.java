@@ -29,35 +29,35 @@ public class FindPath {
     }
 
     static class Node {
-        private double id;
-        private double lat;
-        private double lon;
+        private long id;
+        private long lat;
+        private long lon;
 
-        public Node(double id, double lat, double lon) {
+        public Node(long id, long lat, long lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public double getId() {
+        public long getId() {
             return this.id;
         }
 
-        public double getLat() {
+        public long getLat() {
             return this.lat;
         }
         
-        public double getLon() {
+        public long getLon() {
             return this.lon;
         }
     }
     
     private class Road {
         private UUID id;
-        private double src;
-        private double dst;
+        private long src;
+        private long dst;
 
-        public Road(double src, double dst) {
+        public Road(long src, long dst) {
             this.id = UUID.randomUUID();
             this.src = src;
             this.dst = dst;
@@ -67,32 +67,30 @@ public class FindPath {
             return this.id;
         }
         
-        public double getSrc() {
+        public long getSrc() {
             return this.src;
         }
         
-        public double getDst() {
+        public long getDst() {
             return this.dst;
         }
     }
 
     static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        double id = row.getDouble(0);
-        double lat = row.getDouble(7);
-        double lon = row.getDouble(8);
+        long id = row.getAs("_id");
+        long lat = row.getAs("_lat");
+        long lon = row.getAs("_lon");
         return new Node(id, lat, lon);
     }; 
 
     public static void main(String[] args) {
-        
-
         SparkSession spark = SparkSession
             .builder()
             .appName("BuildMap Application")
             .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        roadData.select("_id").show();
+        System.out.println(nodeData.dtypes());
         List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
         for (Node n : nodes) {
             System.out.println(n.getId());
