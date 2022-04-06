@@ -30,10 +30,10 @@ public class FindPath {
 
     static class Node {
         private long id;
-        private long lat;
-        private long lon;
+        private double lat;
+        private double lon;
 
-        public Node(long id, long lat, long lon) {
+        public Node(long id, double lat, double lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
@@ -43,11 +43,11 @@ public class FindPath {
             return this.id;
         }
 
-        public long getLat() {
+        public double getLat() {
             return this.lat;
         }
         
-        public long getLon() {
+        public double getLon() {
             return this.lon;
         }
     }
@@ -78,8 +78,8 @@ public class FindPath {
 
     static MapFunction<Row,Node> mapToNode = (Row row) -> {
         long id = row.getAs("_id");
-        long lat = row.getAs("_lat");
-        long lon = row.getAs("_lon");
+        double lat = row.getAs("_lat");
+        double lon = row.getAs("_lon");
         return new Node(id, lat, lon);
     }; 
 
@@ -90,8 +90,9 @@ public class FindPath {
             .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        System.out.println(nodeData.dtypes()[0]);
-        System.out.println(nodeData.dtypes()[1]);
+        for (int i = 0; i < nodeData.dtypes().length; i++) {
+            System.out.println(nodeData.dtypes()[i]);
+        }
         List<Node> nodes = nodeData.map(mapToNode, Encoders.bean(Node.class)).collectAsList();
         for (Node n : nodes) {
             System.out.println(n.getId());
