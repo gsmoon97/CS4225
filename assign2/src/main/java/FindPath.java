@@ -29,25 +29,25 @@ public class FindPath {
     }
 
     static class Node {
-        private Long id;
-        private Long lat;
-        private Long lon;
+        private double id;
+        private double lat;
+        private double lon;
 
-        public Node(Long id, Long lat, Long lon) {
+        public Node(double id, double lat, double lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public Long getId() {
+        public double getId() {
             return this.id;
         }
 
-        public Long getLat() {
+        public double getLat() {
             return this.lat;
         }
         
-        public Long getLon() {
+        public double getLon() {
             return this.lon;
         }
     }
@@ -77,10 +77,12 @@ public class FindPath {
     }
 
     static MapFunction<Row,Node> mapToNode = (Row row) -> {
-        return new Node(row.getAs("_id"), row.getAs("_lat"), row.getAs("_lon"));
+        return new Node((double)row.getAs("_id"), (double)row.getAs("_lat"), (double)row.getAs("_lon"));
     }; 
 
     public static void main(String[] args) {
+        
+
         SparkSession spark = SparkSession
             .builder()
             .appName("BuildMap Application")
