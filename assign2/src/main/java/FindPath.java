@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +36,8 @@ public class FindPath {
         private double lat;
         private double lon;
 
-        public Node() {};
+        public Node() {
+        };
 
         public Node(long id, double lat, double lon) {
             this.id = id;
@@ -115,18 +117,41 @@ public class FindPath {
         }
     };
 
+    public static class RoadMapper implements FlatMapFunction<Row, Road> {
+        @Override
+        public Iterator<Road> call(Row row) throws Exception {
+            List<Road> roads = new ArrayList<>();
+            List<Row> nodes = row.getList(7);
+            List<Row> tags = row.getList(8);
+            Boolean isHighway = tags.stream().anyMatch(tag -> tag.getAs("_k").toString().equals("highway"));
+            Boolean isOneway = tags.stream().anyMatch(
+                    tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
+            if (isHighway) {
+                for (int i = 0; i < tags.size() - 1; i++) {
+                    long src = nodes.get(i).getAs("_ref");
+                    long dst = nodes.get(i + 1).getAs("_ref");
+                    roads.add(new Road(src, dst));
+                    if (!isOneway) {
+                        roads.add(new Road(dst, src));
+                    }
+                }
+            }
+            return roads.iterator();
+        }
+    };
+
     public static void main(String[] args) {
         SparkSession spark = SparkSession
                 .builder()
                 .appName("BuildMap Application")
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
-        // Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]).filter();
-        for (int i = 0; i < nodeData.dtypes().length; i++) {
-            System.out.println(nodeData.dtypes()[i]);
+        Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
+        for (int i = 0; i < roadData.dtypes().length; i++) {
+            System.out.println(roadData.dtypes()[i]);
         }
         List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
-        // List<Road> roads = roadData.map(new RoadMapper(), Encoders.bean(Road.class)).collectAsList();
+        List<Road> roads = roadData.flatMap(new RoadMapper(),Encoders.bean(Road.class)).collectAsList();
         spark.stop();
     }
 }
