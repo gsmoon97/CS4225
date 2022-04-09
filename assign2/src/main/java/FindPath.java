@@ -147,11 +147,21 @@ public class FindPath {
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
+        for (int i = 0; i < nodeData.dtypes().length; i++) {
+            System.out.println(nodeData.dtypes()[i]);
+        }
+        System.out.println();
         for (int i = 0; i < roadData.dtypes().length; i++) {
             System.out.println(roadData.dtypes()[i]);
         }
         List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
         List<Road> roads = roadData.flatMap(new RoadMapper(),Encoders.bean(Road.class)).collectAsList();
+        for (Road road : roads) {
+            System.out.println(road.src);
+            System.out.println(road.dst);
+            System.out.println();
+        }
+        GraphFrame graph = new GraphFrame(spark.createDataFrame(nodes, Node.class), spark.createDataFrame(roads, Road.class));
         spark.stop();
     }
 }
