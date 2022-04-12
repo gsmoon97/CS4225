@@ -184,17 +184,17 @@ public class FindPath {
         joined.show();
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
-        try {
-            FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
-            FSDataOutputStream dos = fs.create(new Path(args[2]));
-            dos.writeBytes("hello world");
-            collected.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
-            // + gf.triplets().filter(gf.col("src").id ==
-            // r.getAs("nid")).select("dst").collectAsList().toString()));
-        } catch (Exception e) {
-            System.err.println(e);
-        }
-        // collected.select("nid").write().text(args[2]);
+        // try {
+        //     FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
+        //     FSDataOutputStream dos = fs.create(new Path(args[2]));
+        //     dos.writeBytes("hello world");
+        //     collected.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
+        //     // + gf.triplets().filter(gf.col("src").id ==
+        //     // r.getAs("nid")).select("dst").collectAsList().toString()));
+        // } catch (Exception e) {
+        //     System.err.println(e);
+        // }
+        collected.select("nid").write().text(args[2]);
         spark.stop();
     }
 }
