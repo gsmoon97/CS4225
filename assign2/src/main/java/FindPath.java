@@ -133,7 +133,7 @@ public class FindPath {
             Boolean isOneway = tags.stream().anyMatch(
                     tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
             if (isHighway) {
-                for (int i = 0; i < tags.size() - 1; i++) {
+                for (int i = 0; i < nodes.size() - 1; i++) {
                     long src = nodes.get(i).getAs("_ref");
                     long dst = nodes.get(i + 1).getAs("_ref");
                     roads.add(new Road(src, dst));
