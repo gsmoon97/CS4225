@@ -131,9 +131,10 @@ public class FindPath {
             List<Road> roads = new ArrayList<>();
             List<Row> nodes = row.getList(7);
             List<Row> tags = row.getList(8);
-            Boolean isHighway = Stream.ofNullable(tags).flatMap(Collection::stream).anyMatch(tag -> tag.getAs("_k").toString().equals("highway"));
+            Boolean isHighway = Stream.ofNullable(tags).flatMap(Collection::stream).anyMatch(
+                tag -> tag.getAs("_k").toString().equals("highway"));
             Boolean isOneway = Stream.ofNullable(tags).flatMap(Collection::stream).anyMatch(
-                    tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
+                tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
             if (isHighway) {
                 for (int i = 0; i < nodes.size() - 1; i++) {
                     long src = nodes.get(i).getAs("_ref");
@@ -173,16 +174,11 @@ public class FindPath {
         }
         List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
         List<Road> roads = roadData.flatMap(new RoadMapper(), Encoders.bean(Road.class)).collectAsList();
-        for (Road road : roads) {
-            System.out.println(road.src);
-            System.out.println(road.dst);
-            System.out.println();
-        }
         Dataset<Row> vertices = spark.createDataFrame(nodes, Node.class);
         Dataset<Row> edges = spark.createDataFrame(roads, Road.class);
         GraphFrame graph = new GraphFrame(vertices, edges);
-        // graph.vertices().show();
-        // graph.edges().show();
+        graph.vertices().show();
+        graph.edges().show();
         // Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
         // Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         // collected.select("nid", "dsts").write().text(args[1]);
