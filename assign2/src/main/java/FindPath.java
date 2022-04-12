@@ -1,3 +1,7 @@
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.*;
@@ -6,7 +10,9 @@ import org.graphframes.lib.AggregateMessages;
 import scala.Tuple2;
 import scala.Tuple3;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,21 +38,21 @@ public class FindPath {
     }
 
     public static class Node implements Serializable {
-        private long id;
+        private long nid;
         private double lat;
         private double lon;
 
         public Node() {
         };
 
-        public Node(long id, double lat, double lon) {
-            this.id = id;
+        public Node(long nid, double lat, double lon) {
+            this.nid = nid;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public long getId() {
-            return this.id;
+        public long getNId() {
+            return this.nid;
         }
 
         public double getLat() {
@@ -57,8 +63,8 @@ public class FindPath {
             return this.lon;
         }
 
-        public void setId(long id) {
-            this.id = id;
+        public void setNId(long nid) {
+            this.nid = nid;
         }
 
         public void setLat(double lat) {
@@ -71,22 +77,22 @@ public class FindPath {
     }
 
     public static class Road implements Serializable {
-        private UUID id;
+        private UUID rid;
         private long src;
         private long dst;
 
         public Road() {
-            this.id = UUID.randomUUID();
+            this.rid = UUID.randomUUID();
         };
 
         public Road(long src, long dst) {
-            this.id = UUID.randomUUID();
+            this.rid = UUID.randomUUID();
             this.src = src;
             this.dst = dst;
         }
 
-        public UUID getId() {
-            return this.id;
+        public UUID getRId() {
+            return this.rid;
         }
 
         public long getSrc() {
@@ -110,7 +116,7 @@ public class FindPath {
         @Override
         public Node call(Row row) throws Exception {
             Node n = new Node();
-            n.setId(row.getAs("_id"));
+            n.setNId(row.getAs("_id"));
             n.setLat(row.getAs("_lat"));
             n.setLon(row.getAs("_lon"));
             return n;
@@ -140,6 +146,13 @@ public class FindPath {
         }
     };
 
+    public static void writeToFile(String outPath) throws IOException {
+        Configuration config = new Configuration();
+        FileSystem fs = FileSystem.get(config);
+        FSDataOutputStream dos = fs.create(new Path(outPath));
+        dos.writeBytes("hello world");
+    }
+
     public static void main(String[] args) {
         SparkSession spark = SparkSession
                 .builder()
@@ -161,10 +174,14 @@ public class FindPath {
             System.out.println(road.dst);
             System.out.println();
         }
-        GraphFrame graph = new GraphFrame(spark.createDataFrame(nodes, Node.class),
-                spark.createDataFrame(roads, Road.class));
+        Dataset<Row> vertices = spark.createDataFrame(nodes, Node.class);
+        Dataset<Row> edges = spark.createDataFrame(roads, Road.class);
+        GraphFrame graph = new GraphFrame(vertices, edges);
         graph.vertices().show();
         graph.edges().show();
+        Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
+        Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        collected.select(collected.col("nid"), collected.col("dsts")).write().text(args[1]);
         spark.stop();
     }
 }
