@@ -53,7 +53,7 @@ public class FindPath {
             this.lon = lon;
         }
 
-        public long getNId() {
+        public long getNid() {
             return this.nid;
         }
 
@@ -65,7 +65,7 @@ public class FindPath {
             return this.lon;
         }
 
-        public void setNId(long nid) {
+        public void setNid(long nid) {
             this.nid = nid;
         }
 
@@ -93,7 +93,7 @@ public class FindPath {
             this.dst = dst;
         }
 
-        public UUID getRId() {
+        public UUID getRid() {
             return this.rid;
         }
 
@@ -179,8 +179,10 @@ public class FindPath {
         GraphFrame graph = new GraphFrame(vertices, edges);
         graph.vertices().show();
         graph.edges().show();
-        // Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
-        // Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
+        joined.show();
+        Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        collected.show();
         // collected.select("nid", "dsts").write().text(args[1]);
         spark.stop();
     }
