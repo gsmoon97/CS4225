@@ -129,8 +129,8 @@ public class FindPath {
             List<Road> roads = new ArrayList<>();
             List<Row> nodes = row.getList(7);
             List<Row> tags = row.getList(8);
-            Boolean isHighway = tags.stream().flatMap(s->Stream.ofNullable(s)).anyMatch(tag -> tag.getAs("_k").toString().equals("highway"));
-            Boolean isOneway = tags.stream().flatMap(s->Stream.ofNullable(s)).anyMatch(
+            Boolean isHighway = tags.stream().flatMap((Row r) -> Stream.ofNullable(r)).anyMatch(tag -> tag.getAs("_k").toString().equals("highway"));
+            Boolean isOneway = tags.stream().flatMap((Row r) -> Stream.ofNullable(r)).anyMatch(
                     tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
             if (isHighway) {
                 for (int i = 0; i < nodes.size() - 1; i++) {
