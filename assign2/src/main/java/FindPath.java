@@ -151,17 +151,14 @@ public class FindPath {
     };
 
     public static class NeighborMapper implements ForeachFunction<Row> {
-        private FileSystem fs;
         private FSDataOutputStream dos;
 
-        // NeighborMapper(FileSystem fs, FSDataOutputStream dos) {
-        //     this.fs = fs;
-        //     this.dos = dos;
-        // }
+        NeighborMapper(FSDataOutputStream dos) {
+            this.dos = dos;
+        }
         @Override
         public void call(Row row) throws Exception {
-            // dos.writeBytes(row.getAs("nid").toString() + "\n");
-            System.out.println(row.toString());
+            dos.writeBytes(row.toString());
         }
     };
 
@@ -204,7 +201,7 @@ public class FindPath {
             FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
             FSDataOutputStream dos = fs.create(new Path(args[2]));
             // dos.writeBytes(collected.toString());
-            collected.foreach(new NeighborMapper());
+            collected.foreach(new NeighborMapper(FSDataOutputStream dos));
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
             // + gf.triplets().filter(gf.col("src").id ==
             // r.getAs("nid")).select("dst").collectAsList().toString());
