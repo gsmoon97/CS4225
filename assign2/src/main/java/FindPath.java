@@ -146,14 +146,14 @@ public class FindPath {
         }
     };
 
-    public static void writeToFile(GraphFrame gf, String outPath) throws IOException {
-        Configuration config = new Configuration();
-        FileSystem fs = FileSystem.get(config);
-        FSDataOutputStream dos = fs.create(new Path(outPath));
-        dos.writeBytes("hello world");
-        gf.vertices().foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() 
-            + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
-    }
+    // public static void writeToFile(GraphFrame gf, String outPath) throws IOException {
+    //     Configuration config = new Configuration();
+    //     FileSystem fs = FileSystem.get(config);
+    //     FSDataOutputStream dos = fs.create(new Path(outPath));
+    //     dos.writeBytes("hello world");
+    //     gf.vertices().foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() 
+    //         + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
+    // }
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession
