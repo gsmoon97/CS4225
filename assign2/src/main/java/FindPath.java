@@ -179,7 +179,7 @@ public class FindPath {
         GraphFrame graph = new GraphFrame(vertices, edges);
         graph.vertices().show();
         graph.edges().show();
-        Dataset<Row> joined = vertices.join(edges, vertices.col("nid").equalTo(edges.col("src")), "left-outer");
+        Dataset<Row> joined = vertices.join(edges, vertices.col("nid").equalTo(edges.col("src")), "left_outer");
         joined.show();
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
