@@ -186,7 +186,7 @@ public class FindPath {
         collected.show();
         try {
             FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
-            FSDataOutputStream dos = fs.create(new Path(args[1]));
+            FSDataOutputStream dos = fs.create(new Path(args[2]));
             dos.writeBytes("hello world");
             collected.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
             // + gf.triplets().filter(gf.col("src").id ==
@@ -194,7 +194,7 @@ public class FindPath {
         } catch (Exception e) {
             System.err.println(e);
         }
-        collected.select("nid").write().text(args[1]);
+        // collected.select("nid").write().text(args[2]);
         spark.stop();
     }
 }
