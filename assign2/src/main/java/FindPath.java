@@ -118,7 +118,7 @@ public class FindPath {
         @Override
         public Node call(Row row) throws Exception {
             Node n = new Node();
-            n.setNId(row.getAs("_id"));
+            n.setNid(row.getAs("_id"));
             n.setLat(row.getAs("_lat"));
             n.setLon(row.getAs("_lon"));
             return n;
