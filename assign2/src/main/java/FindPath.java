@@ -149,14 +149,14 @@ public class FindPath {
         }
     };
 
-    // public static void writeToFile(GraphFrame gf, String outPath) throws IOException {
-    //     Configuration config = new Configuration();
-    //     FileSystem fs = FileSystem.get(config);
-    //     FSDataOutputStream dos = fs.create(new Path(outPath));
-    //     dos.writeBytes("hello world");
-    //     gf.vertices().foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() 
-    //         + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
-    // }
+    public static void writeToFile(GraphFrame gf, String outPath) throws IOException {
+        Configuration config = new Configuration();
+        FileSystem fs = FileSystem.get(config);
+        FSDataOutputStream dos = fs.create(new Path(outPath));
+        dos.writeBytes("hello world");
+        gf.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString()+"\n");
+            // + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
+    }
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession
@@ -183,7 +183,11 @@ public class FindPath {
         joined.show();
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
-        collected.write().text(args[1]);
+        try {
+            writeToFile(collected, args[1]);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
         spark.stop();
     }
 }
