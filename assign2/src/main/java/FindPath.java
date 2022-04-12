@@ -201,7 +201,7 @@ public class FindPath {
             FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
             FSDataOutputStream dos = fs.create(new Path(args[2]));
             // dos.writeBytes(collected.toString());
-            collected.foreach(new NeighborMapper(FSDataOutputStream dos));
+            collected.foreach(new NeighborMapper(dos));
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
             // + gf.triplets().filter(gf.col("src").id ==
             // r.getAs("nid")).select("dst").collectAsList().toString());
