@@ -3,6 +3,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.*;
 import org.graphframes.GraphFrame;
@@ -149,6 +150,20 @@ public class FindPath {
         }
     };
 
+    public static class NeighborMapper implements ForeachFunction<Row> {
+        private FileSystem fs;
+        private FSDataOutputStream dos;
+
+        NeighborMapper(FileSystem fs, FSDataOutputStream dos) {
+            this.fs = fs;
+            this.dos = dos;
+        }
+        @Override
+        public void call(Row row) throws Exception {
+            dos.writeBytes(row.getAs("nid").toString() + "\n");
+        }
+    };
+
     // public static void writeToFile(Dataset<Row> ds, String outPath) throws IOException {
     //     Configuration config = new Configuration();
     //     FileSystem fs = FileSystem.get(config);
@@ -184,17 +199,18 @@ public class FindPath {
         joined.show();
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
-        // try {
-        //     FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
-        //     FSDataOutputStream dos = fs.create(new Path(args[2]));
-        //     dos.writeBytes("hello world");
-        //     collected.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
-        //     // + gf.triplets().filter(gf.col("src").id ==
-        //     // r.getAs("nid")).select("dst").collectAsList().toString()));
-        // } catch (Exception e) {
-        //     System.err.println(e);
-        // }
-        collected.select("nid").coalesce(1).write().text(args[2]);
+        try {
+            FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
+            FSDataOutputStream dos = fs.create(new Path(args[2]));
+            dos.writeBytes(collected.toString());
+            collected.foreach(new NeighborMapper(fs, dos));
+            // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
+            // + gf.triplets().filter(gf.col("src").id ==
+            // r.getAs("nid")).select("dst").collectAsList().toString());
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+        // collected.select("nid").coalesce(1).write().text(args[2]);
         spark.stop();
     }
 }
