@@ -146,17 +146,19 @@ public class FindPath {
         }
     };
 
-    public static void writeToFile(String outPath) throws IOException {
+    public static void writeToFile(GraphFrame gf, String outPath) throws IOException {
         Configuration config = new Configuration();
         FileSystem fs = FileSystem.get(config);
         FSDataOutputStream dos = fs.create(new Path(outPath));
         dos.writeBytes("hello world");
+        gf.vertices().foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() 
+            + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
     }
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession
                 .builder()
-                .appName("BuildMapApplication")
+                .appName("FindPathApplication")
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
@@ -181,7 +183,7 @@ public class FindPath {
         graph.edges().show();
         Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
-        collected.select(collected.col("nid"), collected.col("dsts")).write().text(args[1]);
+        collected.select("nid", "dsts").write().text(args[1]);
         spark.stop();
     }
 }
