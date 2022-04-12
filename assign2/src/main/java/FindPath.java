@@ -132,9 +132,9 @@ public class FindPath {
             List<Row> nodes = row.getList(7);
             List<Row> tags = row.getList(8);
             Boolean isHighway = Stream.ofNullable(tags).flatMap(Collection::stream).anyMatch(
-                tag -> tag.getAs("_k").toString().equals("highway"));
+                    tag -> tag.getAs("_k").toString().equals("highway"));
             Boolean isOneway = Stream.ofNullable(tags).flatMap(Collection::stream).anyMatch(
-                tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
+                    tag -> tag.getAs("_k").toString().equals("oneway") && tag.getAs("_v").toString().equals("yes"));
             if (isHighway) {
                 for (int i = 0; i < nodes.size() - 1; i++) {
                     long src = nodes.get(i).getAs("_ref");
@@ -150,12 +150,13 @@ public class FindPath {
     };
 
     public static void writeToFile(Dataset<Row> ds, String outPath) throws IOException {
-        Configuration config = new Configuration();
-        FileSystem fs = FileSystem.get(config);
-        FSDataOutputStream dos = fs.create(new Path(outPath));
-        dos.writeBytes("hello world");
-        ds.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString()+"\n"));
-            // + gf.triplets().filter(gf.col("src").id == r.getAs("nid")).select("dst").collectAsList().toString()));
+        // Configuration config = new Configuration();
+        // FileSystem fs = FileSystem.get(config);
+        // FSDataOutputStream dos = fs.create(new Path(outPath));
+        // dos.writeBytes("hello world");
+        // ds.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
+        // // + gf.triplets().filter(gf.col("src").id ==
+        // // r.getAs("nid")).select("dst").collectAsList().toString()));
     }
 
     public static void main(String[] args) {
@@ -184,10 +185,16 @@ public class FindPath {
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
         try {
-            writeToFile(collected, args[1]);
+            FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
+            FSDataOutputStream dos = fs.create(new Path(args[1]));
+            dos.writeBytes("hello world");
+            collected.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
+            // + gf.triplets().filter(gf.col("src").id ==
+            // r.getAs("nid")).select("dst").collectAsList().toString()));
         } catch (Exception e) {
             System.err.println(e);
         }
+        collected.write();
         spark.stop();
     }
 }
