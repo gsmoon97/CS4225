@@ -183,7 +183,7 @@ public class FindPath {
         joined.show();
         Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
         collected.show();
-        // collected.select("nid", "dsts").write().text(args[1]);
+        collected.write().text(args[1]);
         spark.stop();
     }
 }
