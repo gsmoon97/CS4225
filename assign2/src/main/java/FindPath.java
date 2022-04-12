@@ -179,11 +179,11 @@ public class FindPath {
         Dataset<Row> vertices = spark.createDataFrame(nodes, Node.class);
         Dataset<Row> edges = spark.createDataFrame(roads, Road.class);
         GraphFrame graph = new GraphFrame(vertices, edges);
-        graph.vertices().show();
-        graph.edges().show();
-        Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
-        Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
-        collected.select("nid", "dsts").write().text(args[1]);
+        // graph.vertices().show();
+        // graph.edges().show();
+        // Dataset<Row> joined = vertices.join(edges, edges.col("nid").equalTo(vertices.col("src")), "left-outer");
+        // Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        // collected.select("nid", "dsts").write().text(args[1]);
         spark.stop();
     }
 }
