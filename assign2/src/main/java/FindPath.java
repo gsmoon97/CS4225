@@ -200,7 +200,8 @@ public class FindPath {
         try {
             // FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
             // FSDataOutputStream dos = fs.create(new Path(args[2]));
-            collected.withColumn("dsts", functions.concat_ws(" ", collected.col("dsts"))).coalesce(1).write().csv(args[2]);
+            collected = collected.withColumn("dsts", functions.concat_ws(" ", collected.col("dsts")));
+            collected.select(functions.concat_ws(" ", collected.col("nid"), collected.col("dsts"))).show();
             // dos.writeBytes(collected.collect().toString());
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
             // + gf.triplets().filter(gf.col("src").id ==
