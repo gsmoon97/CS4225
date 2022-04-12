@@ -194,7 +194,7 @@ public class FindPath {
         } catch (Exception e) {
             System.err.println(e);
         }
-        collected.write();
+        collected.select("nid").write().text(args[1]);
         spark.stop();
     }
 }
