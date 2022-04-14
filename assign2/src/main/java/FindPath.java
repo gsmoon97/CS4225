@@ -204,7 +204,7 @@ public class FindPath {
             collected = collected.select(functions.concat_ws(" ", collected.col("nid"), collected.col("dsts")));
             List<String> result = collected.map((MapFunction<Row, String>)row -> row.mkString(), Encoders.STRING()).collectAsList();
             for (String r : result) {
-                dos.writeBytes(r);
+                dos.writeBytes(r + "\n");
             }
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.mkString()));
             // dos.writeBytes(collected.collect().toString());
