@@ -193,27 +193,28 @@ public class FindPath {
         GraphFrame graph = new GraphFrame(vertices, edges);
         graph.vertices().show();
         graph.edges().show();
-        Dataset<Row> joined = vertices.join(edges, vertices.col("nid").equalTo(edges.col("src")), "left_outer");
-        joined.show();
-        Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
-        collected.show();
-        try {
-            FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
-            FSDataOutputStream dos = fs.create(new Path(args[2]));
-            collected = collected.withColumn("dsts", functions.concat_ws(" ", collected.col("dsts")));
-            collected = collected.select(functions.concat_ws(" ", collected.col("nid"), collected.col("dsts")));
-            List<String> result = collected.map((MapFunction<Row, String>)row -> row.mkString(), Encoders.STRING()).collectAsList();
-            for (String r : result) {
-                dos.writeBytes(r + "\n");
-            }
-            // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.mkString()));
-            // dos.writeBytes(collected.collect().toString());
-            // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
-            // + gf.triplets().filter(gf.col("src").id ==
-            // r.getAs("nid")).select("dst").collectAsList().toString());
-        } catch (Exception e) {
-            System.err.println(e);
-        }
+        graph.triplets().show();
+        // Dataset<Row> joined = vertices.join(edges, vertices.col("nid").equalTo(edges.col("src")), "left_outer");
+        // joined.show();
+        // Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        // collected.show();
+        // try {
+        //     FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
+        //     FSDataOutputStream dos = fs.create(new Path(args[2]));
+        //     collected = collected.withColumn("dsts", functions.concat_ws(" ", collected.col("dsts")));
+        //     collected = collected.select(functions.concat_ws(" ", collected.col("nid"), collected.col("dsts")));
+        //     List<String> result = collected.map((MapFunction<Row, String>)row -> row.mkString(), Encoders.STRING()).collectAsList();
+        //     for (String r : result) {
+        //         dos.writeBytes(r + "\n");
+        //     }
+        //     // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.mkString()));
+        //     // dos.writeBytes(collected.collect().toString());
+        //     // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
+        //     // + gf.triplets().filter(gf.col("src").id ==
+        //     // r.getAs("nid")).select("dst").collectAsList().toString());
+        // } catch (Exception e) {
+        //     System.err.println(e);
+        // }
         // collected.select("nid").coalesce(1).write().text(args[2]);
         spark.stop();
     }
