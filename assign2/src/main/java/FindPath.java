@@ -2,6 +2,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.spark.api.java.function.FilterFunction;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.api.java.function.MapFunction;
@@ -24,6 +25,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class FindPath {
+    public static SparkSession spark;
     // From:
     // https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude
     private static double distance(double lat1, double lat2, double lon1, double lon2) {
@@ -150,54 +152,35 @@ public class FindPath {
         }
     };
 
-    public static class NeighborMapper implements ForeachFunction<Row> {
-        private FSDataOutputStream dos;
-
-        NeighborMapper(FSDataOutputStream dos) {
-            this.dos = dos;
+    private static Dataset<Row> findShortestPath(GraphFrame gf, long srcId, long dstId) {
+        if (gf.vertices().filter("id = " + String.valueOf(dstId)).count() == 0) {
+            return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
         }
-        @Override
-        public void call(Row row) throws Exception {
-            dos.writeBytes(row.toString());
-        }
-    };
-
-    // public static void writeToFile(Dataset<Row> ds, String outPath) throws IOException {
-    //     Configuration config = new Configuration();
-    //     FileSystem fs = FileSystem.get(config);
-    //     FSDataOutputStream dos = fs.create(new Path(outPath));
-    //     dos.writeBytes("hello world");
-    //     ds.foreach((Row r) -> dos.writeBytes(r.getAs("nid").toString() + "\n"));
-    //     // + gf.triplets().filter(gf.col("src").id ==
-    //     // r.getAs("nid")).select("dst").collectAsList().toString()));
-    // }
+        return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
+    }
 
     public static void main(String[] args) {
-        SparkSession spark = SparkSession
+        spark = SparkSession
                 .builder()
                 .appName("FindPathApplication")
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        for (int i = 0; i < nodeData.dtypes().length; i++) {
-            System.out.println(nodeData.dtypes()[i]);
-        }
-        System.out.println();
-        for (int i = 0; i < roadData.dtypes().length; i++) {
-            System.out.println(roadData.dtypes()[i]);
-        }
+        // for (int i = 0; i < nodeData.dtypes().length; i++) {
+        //     System.out.println(nodeData.dtypes()[i]);
+        // }
+        // System.out.println();
+        // for (int i = 0; i < roadData.dtypes().length; i++) {
+        //     System.out.println(roadData.dtypes()[i]);
+        // }
         List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
         List<Road> roads = roadData.flatMap(new RoadMapper(), Encoders.bean(Road.class)).collectAsList();
         Dataset<Row> vertices = spark.createDataFrame(nodes, Node.class);
         Dataset<Row> edges = spark.createDataFrame(roads, Road.class);
-        GraphFrame graph = new GraphFrame(vertices, edges);
-        graph.vertices().show();
-        graph.edges().show();
-        vertices = graph.dropIsolatedVertices().vertices();
+        GraphFrame graph = new GraphFrame(vertices, edges).dropIsolatedVertices();
+        vertices = graph.vertices();
         Dataset<Row> joined = vertices.join(edges, vertices.col("id").equalTo(edges.col("src")), "left_outer");
-        joined.show();
         Dataset<Row> collected = joined.groupBy("id").agg(functions.collect_set("dst").as("dsts"));
-        collected.show();
         try {
             FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
             FSDataOutputStream dos = fs.create(new Path(args[2]));
@@ -207,15 +190,9 @@ public class FindPath {
             for (String r : result) {
                 dos.writeBytes(r + "\n");
             }
-            // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.mkString()));
-            // dos.writeBytes(collected.collect().toString());
-            // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
-            // + gf.triplets().filter(gf.col("src").id ==
-            // r.getAs("nid")).select("dst").collectAsList().toString());
         } catch (Exception e) {
             System.err.println(e);
-        }
-        // collected.select("nid").coalesce(1).write().text(args[2]);
+        } 
         spark.stop();
     }
 }
