@@ -41,21 +41,21 @@ public class FindPath {
     }
 
     public static class Node implements Serializable {
-        private long nid;
+        private long id;
         private double lat;
         private double lon;
 
         public Node() {
         };
 
-        public Node(long nid, double lat, double lon) {
-            this.nid = nid;
+        public Node(long id, double lat, double lon) {
+            this.id = id;
             this.lat = lat;
             this.lon = lon;
         }
 
-        public long getNid() {
-            return this.nid;
+        public long getId() {
+            return this.id;
         }
 
         public double getLat() {
@@ -66,8 +66,8 @@ public class FindPath {
             return this.lon;
         }
 
-        public void setNid(long nid) {
-            this.nid = nid;
+        public void setId(long id) {
+            this.id = id;
         }
 
         public void setLat(double lat) {
@@ -119,7 +119,7 @@ public class FindPath {
         @Override
         public Node call(Row row) throws Exception {
             Node n = new Node();
-            n.setNid(row.getAs("_id"));
+            n.setId(row.getAs("_id"));
             n.setLat(row.getAs("_lat"));
             n.setLon(row.getAs("_lon"));
             return n;
@@ -193,10 +193,12 @@ public class FindPath {
         GraphFrame graph = new GraphFrame(vertices, edges);
         graph.vertices().show();
         graph.edges().show();
-        graph.triplets().show();
-        // Dataset<Row> joined = vertices.join(edges, vertices.col("nid").equalTo(edges.col("src")), "left_outer");
+        vertices = graph.dropIsolatedVertices().vertices();
+        graph.triplets();
+        // vertices = graph.dropIsolatedVertices().vertices();
+        // Dataset<Row> joined = vertices.join(edges, vertices.col("id").equalTo(edges.col("src")), "left_outer");
         // joined.show();
-        // Dataset<Row> collected = joined.groupBy("nid").agg(functions.collect_set("dst").as("dsts"));
+        // Dataset<Row> collected = joined.groupBy("id").agg(functions.collect_set("dst").as("dsts"));
         // collected.show();
         // try {
         //     FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
