@@ -202,7 +202,10 @@ public class FindPath {
             FSDataOutputStream dos = fs.create(new Path(args[2]));
             collected = collected.withColumn("dsts", functions.concat_ws(" ", collected.col("dsts")));
             collected = collected.select(functions.concat_ws(" ", collected.col("nid"), collected.col("dsts")));
-            dos.writeBytes(collected.collect().toString());
+            List<String> result = collected.map((MapFunction<Row, String>)row -> row.mkString(), Encoders.STRING()).collectAsList();
+            for (String r : result) {
+                dos.writeBytes(r);
+            }
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.mkString()));
             // dos.writeBytes(collected.collect().toString());
             // collected.foreach((ForeachFunction<Row>) r -> dos.writeBytes(r.getAs("nid").toString() + "\n")
