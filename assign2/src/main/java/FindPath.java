@@ -210,7 +210,8 @@ public class FindPath {
             }
             br.close();
             for (String[] s : list) {
-                System.out.println(Arrays.toString(s));
+                Dataset<Row> row = graph.shortestPaths().landmarks(new ArrayList<>(Arrays.asList(s[0], s[1]))).run();
+                row.show();
             }
         } catch (Exception e) {
             System.err.println(e);
