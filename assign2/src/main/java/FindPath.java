@@ -172,9 +172,7 @@ public class FindPath {
         spark = SparkSession
                 .builder()
                 .appName("FindPathApplication")
-                .config("spark.executor.cores", 4)
-                .config("spark.executor.memory", "8g")
-                .config("spark.executor.instances", 128)
+                .master("local[*]")
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
