@@ -1,4 +1,5 @@
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -16,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.sql.Struct;
 import java.util.ArrayList;
@@ -199,8 +201,8 @@ public class FindPath {
             System.err.println(e);
         }
         try {
-            File input = new File(args[1]);
-            BufferedReader br = new BufferedReader(new FileReader(input));
+            FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
+            BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(new Path(args[1]))));
             String line;
             List<String[]> list = new ArrayList<String[]>();
             while((line = br.readLine()) != null) {
