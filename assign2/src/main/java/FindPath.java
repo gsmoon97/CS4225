@@ -1,6 +1,7 @@
 // Matric Number: A0210908L
 // Name: Moon Geonsik
 // References : 
+// https://www.oreilly.com/library/view/graph-algorithms/9781492047674/ch04.html#shortest-weighted-path-spark
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -161,12 +162,31 @@ public class FindPath {
         }
     };
 
-    private static Dataset<Row> findShortestPath(GraphFrame gf, long srcId, long dstId) {
-        if (gf.vertices().filter("id = " + String.valueOf(dstId)).count() == 0) {
-            return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
+    public static class VisitedFilter implements FilterFunction<Row> {
+        @Override
+        public boolean call(Row row) throws Exception {
+            return row.getAs("visited");
         }
-        return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
     }
+
+    // private static Dataset<Row> findShortestPath(GraphFrame gf, long srcId, long dstId) {
+    //     if (gf.vertices().filter(functions.col("id").equalTo(String.valueOf(dstId))).count() == 0) {
+    //         return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
+    //     }
+
+    //     Dataset<Row> vertices = gf.vertices().withColumn("visited", functions.lit(false))
+    //         .withColumn("distance", functions.when(functions.col("id").equalTo(String.valueOf(srcId)), 0).otherwise(Double.POSITIVE_INFINITY))
+    //         .withColumn("path", functions.array());
+    //     Dataset<Row> cachedVertices = AggregateMessages.getCachedDataFrame(vertices);
+    //     GraphFrame gf2 = new GraphFrame(cachedVertices, gf.edges());
+
+    //     while(gf2.vertices().filter(new VisitedFilter()).first().getBoolean(0)) {
+    //         double currentNodeId = gf2.vertices().filter(new VisitedFilter()).sort("distance").first().getAs("id");
+    //         double msgDistance = AggregateMessages.edge.getAs("cost") + AggregateMessages.src.getAs("distance");
+    //     }
+
+    //     return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
+    // }
 
     public static void main(String[] args) {
         spark = SparkSession
@@ -208,9 +228,10 @@ public class FindPath {
             }
             br.close();
             for (String[] s : list) {
-                findShortestPath(graph, Long.parseLong(s[0]), Long.parseLong(s[1])).show();
-                Dataset<Row> row = graph.shortestPaths().landmarks(new ArrayList<>(Arrays.asList(s[0], s[1]))).run();
-                row.show();
+                Dataset<Row> result = graph.bfs().fromExpr(functions.col("id").equalTo(s[0])).toExpr(functions.col("id").equalTo(s[1])).run();
+                result.show();
+                // Dataset<Row> row = graph.shortestPaths().landmarks(new ArrayList<>(Arrays.asList(s[0], s[1]))).run();
+                // row.show();
             }
         } catch (Exception e) {
             System.err.println(e);
