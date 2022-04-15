@@ -13,6 +13,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.ForeachFunction;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
 import org.graphframes.GraphFrame;
 import org.graphframes.lib.AggregateMessages;
 import scala.Tuple2;
@@ -221,6 +222,7 @@ public class FindPath {
         try {
             FileSystem fs = FileSystem.get(spark.sparkContext().hadoopConfiguration());
             BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(new Path(args[1]))));
+            FSDataOutputStream dos = fs.create(new Path(args[3]));
             String line;
             List<String[]> list = new ArrayList<String[]>();
             while((line = br.readLine()) != null) {
@@ -232,10 +234,13 @@ public class FindPath {
                 result.show();
                 List<String> path = new ArrayList<>();
                 for (int i = 0; i < result.columns().length; i = i + 2) {
-                    System.out.println(result.first().get(i).getClass());
+                    GenericRowWithSchema grs = (GenericRowWithSchema) result.first().get(i);
+                    path.add(grs.getString(0));
                 }
-                
+                dos.writeBytes(String.join(" -> ", path) + "\n");
             }
+            dos.close();
+            fs.close();
         } catch (Exception e) {
             System.err.println(e);
         }
