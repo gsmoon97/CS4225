@@ -208,7 +208,7 @@ public class FindPath {
             }
             br.close();
             for (String[] s : list) {
-                System.out.println(s);
+                System.out.println(Arrays.toString(s));
             }
         } catch (Exception e) {
             System.err.println(e);
