@@ -235,7 +235,7 @@ public class FindPath {
                 List<String> path = new ArrayList<>();
                 for (int i = 0; i < result.columns().length; i = i + 2) {
                     GenericRowWithSchema grs = (GenericRowWithSchema) result.first().get(i);
-                    path.add(grs.getString(0));
+                    path.add(String.valueOf(grs.get(0)));
                 }
                 dos.writeBytes(String.join(" -> ", path) + "\n");
             }
