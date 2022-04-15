@@ -1,3 +1,7 @@
+// Matric Number: A0210908L
+// Name: Moon Geonsik
+// References : 
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -168,16 +172,12 @@ public class FindPath {
         spark = SparkSession
                 .builder()
                 .appName("FindPathApplication")
+                .config("spark.executor.cores", 4)
+                .config("spark.executor.memory", "8g")
+                .config("spark.executor.instances", 128)
                 .getOrCreate();
         Dataset<Row> nodeData = spark.read().format("xml").option("rowTag", "node").load(args[0]);
         Dataset<Row> roadData = spark.read().format("xml").option("rowTag", "way").load(args[0]);
-        // for (int i = 0; i < nodeData.dtypes().length; i++) {
-        //     System.out.println(nodeData.dtypes()[i]);
-        // }
-        // System.out.println();
-        // for (int i = 0; i < roadData.dtypes().length; i++) {
-        //     System.out.println(roadData.dtypes()[i]);
-        // }
         List<Node> nodes = nodeData.map(new NodeMapper(), Encoders.bean(Node.class)).collectAsList();
         List<Road> roads = roadData.flatMap(new RoadMapper(), Encoders.bean(Road.class)).collectAsList();
         Dataset<Row> vertices = spark.createDataFrame(nodes, Node.class);
@@ -210,6 +210,7 @@ public class FindPath {
             }
             br.close();
             for (String[] s : list) {
+                findShortestPath(graph, Long.parseLong(s[0]), Long.parseLong(s[1])).show();
                 Dataset<Row> row = graph.shortestPaths().landmarks(new ArrayList<>(Arrays.asList(s[0], s[1]))).run();
                 row.show();
             }
