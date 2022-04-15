@@ -12,6 +12,9 @@ import org.graphframes.lib.AggregateMessages;
 import scala.Tuple2;
 import scala.Tuple3;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Struct;
@@ -190,9 +193,26 @@ public class FindPath {
             for (String r : result) {
                 dos.writeBytes(r + "\n");
             }
+            dos.close();
+            fs.close();
         } catch (Exception e) {
             System.err.println(e);
-        } 
+        }
+        try {
+            File input = new File(args[1]);
+            BufferedReader br = new BufferedReader(new FileReader(input));
+            String line;
+            List<String[]> list = new ArrayList<String[]>();
+            while((line = br.readLine()) != null) {
+                list.add(line.split(" "));
+            }
+            br.close();
+            for (String[] s : list) {
+                System.out.println(s);
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
         spark.stop();
     }
 }
