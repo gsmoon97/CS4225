@@ -232,7 +232,7 @@ public class FindPath {
                 result.show();
                 List<String> path = new ArrayList<>();
                 for (int i = 0; i < result.columns().length; i = i + 2) {
-                    System.out.println(result.first().get(i));
+                    System.out.println(result.first().get(i).getClass());
                 }
                 
             }
