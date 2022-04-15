@@ -230,8 +230,11 @@ public class FindPath {
             for (String[] s : list) {
                 Dataset<Row> result = graph.bfs().fromExpr(functions.col("id").equalTo(s[0])).toExpr(functions.col("id").equalTo(s[1])).run();
                 result.show();
-                // Dataset<Row> row = graph.shortestPaths().landmarks(new ArrayList<>(Arrays.asList(s[0], s[1]))).run();
-                // row.show();
+                List<String> path = new ArrayList<>();
+                for (int i = 0; i < result.columns().length; i = i + 2) {
+                    System.out.println(result.first().get(i));
+                }
+                
             }
         } catch (Exception e) {
             System.err.println(e);
