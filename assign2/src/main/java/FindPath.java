@@ -1,7 +1,9 @@
 // Matric Number: A0210908L
 // Name: Moon Geonsik
 // References : 
-// https://www.oreilly.com/library/view/graph-algorithms/9781492047674/ch04.html#shortest-weighted-path-spark
+// https://graphframes.github.io/graphframes/docs/_site/api/scala/org/graphframes/lib/BFS.html
+// https://graphframes.github.io/graphframes/docs/_site/user-guide.html#message-passing-via-aggregatemessages
+// https://www.baeldung.com/spark-graph-graphframes
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -163,32 +165,6 @@ public class FindPath {
         }
     };
 
-    public static class VisitedFilter implements FilterFunction<Row> {
-        @Override
-        public boolean call(Row row) throws Exception {
-            return row.getAs("visited");
-        }
-    }
-
-    // private static Dataset<Row> findShortestPath(GraphFrame gf, long srcId, long dstId) {
-    //     if (gf.vertices().filter(functions.col("id").equalTo(String.valueOf(dstId))).count() == 0) {
-    //         return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
-    //     }
-
-    //     Dataset<Row> vertices = gf.vertices().withColumn("visited", functions.lit(false))
-    //         .withColumn("distance", functions.when(functions.col("id").equalTo(String.valueOf(srcId)), 0).otherwise(Double.POSITIVE_INFINITY))
-    //         .withColumn("path", functions.array());
-    //     Dataset<Row> cachedVertices = AggregateMessages.getCachedDataFrame(vertices);
-    //     GraphFrame gf2 = new GraphFrame(cachedVertices, gf.edges());
-
-    //     while(gf2.vertices().filter(new VisitedFilter()).first().getBoolean(0)) {
-    //         double currentNodeId = gf2.vertices().filter(new VisitedFilter()).sort("distance").first().getAs("id");
-    //         double msgDistance = AggregateMessages.edge.getAs("cost") + AggregateMessages.src.getAs("distance");
-    //     }
-
-    //     return spark.createDataFrame(new ArrayList<Row>(), gf.vertices().schema()).withColumn("path", functions.array());
-    // }
-
     public static void main(String[] args) {
         spark = SparkSession
                 .builder()
@@ -231,7 +207,6 @@ public class FindPath {
             br.close();
             for (String[] s : list) {
                 Dataset<Row> result = graph.bfs().fromExpr(functions.col("id").equalTo(s[0])).toExpr(functions.col("id").equalTo(s[1])).run();
-                result.show();
                 List<String> path = new ArrayList<>();
                 for (int i = 0; i < result.columns().length; i = i + 2) {
                     GenericRowWithSchema grs = (GenericRowWithSchema) result.first().get(i);
